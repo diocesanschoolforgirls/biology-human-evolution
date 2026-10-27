@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Migration Quiz</title>
+<style>
+  :root {
+    /* Orange palette, matching the AS91603 Plant and Animal Responses slides */
+    --page: #FFF4E0;          /* page background */
+    --deep-forest: #FFF9EF;   /* feedback boxes, concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #FDE6C6;     /* letter circles, dividers */
+    --sea-mint: #EA580C;      /* orange accent */
+    --bright: #F59E0B;        /* amber */
+    --rust: #9A3412;          /* rust text accent */
+    --ivory-mint: #1E293B;    /* body text */
+    --sage-mist: #6B4E3D;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on orange fills */
+    --soft-moss: #9A3412;     /* button hover */
+    --heading: #1E293B;       /* headings */
+    --good: #2F7D4F;          /* correct */
+    --good-tint: #E4F3E9;
+    --rose: #B42318;          /* incorrect */
+    --rose-tint: #FDECEA;
+    --mint-tint: #E4F3E9;
+    --option-bg: #FFF8EC;
+    --track: #FCE3BE;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 0; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 10px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+  .label, h3 { color: var(--rust) !important; }
+  .option.correct { border-color: var(--good); background: var(--good-tint); }
+  .option.correct .letter { background: var(--good); color: #FFFFFF; }
+  .fb-box { border-left-color: var(--good); }
+  .fb-box .fb-head { color: var(--good) !important; }
+  .fb-box.wrong .fb-head { color: var(--rose) !important; }
+  .mark.ok { background: var(--good); }
+  .concept-score { color: var(--good); }
+  .letter { color: var(--rust); }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .option.wrong .letter { color: #FFFFFF; }
+
+  /* Question navigation */
+  .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 12px; }
+  .qnav button {
+    width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    border: 2px solid var(--pine-dark); background: var(--pine);
+    color: var(--sage-mist); font: inherit; font-size: 14px; font-weight: bold; line-height: 1;
+    cursor: pointer; transition: transform .15s ease, border-color .15s ease;
+  }
+  .qnav button:hover { border-color: var(--sea-mint); }
+  .qnav button:focus-visible { outline: 3px solid var(--bright); outline-offset: 2px; }
+  .qnav button.done-ok { background: var(--good-tint); border-color: var(--good); color: var(--good); }
+  .qnav button.done-no { background: var(--rose-tint); border-color: var(--rose); color: var(--rose); }
+  .qnav button.current { background: var(--sea-mint); border-color: var(--sea-mint); color: #FFFFFF; }
+  .qnav button.results-btn { width: auto; padding: 0 14px; border-radius: 16px; margin-left: auto; }
+  .qnav button.results-btn:disabled { opacity: .45; cursor: default; }
+  .qnav button.results-btn:disabled:hover { border-color: var(--pine-dark); }
+  @media (max-width: 520px) {
+    .qnav { gap: 5px; }
+    .qnav button { width: 28px; height: 28px; font-size: 13px; }
+    .qnav button.results-btn { margin-left: 0; height: 28px; }
+  }
+  .review-hint { margin: -4px 0 8px; font-size: 15px; color: var(--sage-mist); font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91603 · Plant and Animal Responses</div>
+    <div class="title-row">
+      <h1>Migration</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. Choose the most correct answer.</p>
+    <div class="divider"></div>
+  </header>
+
+  <nav class="qnav" id="qnav" aria-label="Choose a question"></nav>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    "concept": "Defining migration",
+    "q": "Which statement best describes migration?",
+    "options": [
+      "The one-way movement of young animals away from where they were born",
+      "The daily movement of an animal around its home range to find food",
+      "Movement between geographic areas at specific stages of the life cycle"
+    ],
+    "answer": 2,
+    "why": [
+      "A one-way movement of young away from their birthplace is dispersal. Migration happens at particular times or life stages and often involves returning.",
+      "Daily movement within a home range is foraging. Migration involves travelling between separate areas, often over long distances.",
+      "Migration is the movement of animals from one geographic area to another at specific stages of their life cycle, often seasonally. Many migrations are return journeys between breeding and feeding grounds."
+    ]
+  },
+  {
+    "concept": "Defining migration",
+    "q": "Kuaka (bar-tailed godwits) breed in Alaska, fly to New Zealand for the southern summer, then fly back to Alaska to breed again. This is best described as",
+    "options": [
+      "return migration",
+      "dispersal",
+      "a one-way migration"
+    ],
+    "answer": 0,
+    "why": [
+      "Kuaka move between their breeding grounds in Alaska and their feeding grounds in New Zealand, then return, repeating the cycle every year. This annual cycle is return migration.",
+      "Dispersal is a one-way movement away from where an animal was born. Kuaka return to the same breeding area each year.",
+      "Kuaka do make long journeys, so this is partly right. However, they come back to their breeding grounds each year, so it is not one-way."
+    ]
+  },
+  {
+    "concept": "Advantages and costs",
+    "q": "What is the main advantage for kuaka of leaving Alaska after breeding?",
+    "options": [
+      "They escape the Arctic cold, which would otherwise kill them over winter",
+      "They reach places where food is plentiful while Arctic food becomes scarce",
+      "They find mates in New Zealand, because there are none in Alaska"
+    ],
+    "answer": 1,
+    "why": [
+      "Cold is part of the picture, so this is partly right. However, the main problem in the Arctic winter is that food becomes scarce. Migration lets kuaka follow the food supply.",
+      "As the Arctic winter arrives, the food kuaka rely on becomes unavailable. New Zealand mudflats provide plenty of food during the southern summer, so they can build up energy stores before returning north to breed.",
+      "Kuaka breed in Alaska, not New Zealand. They mate and raise young on their northern breeding grounds."
+    ]
+  },
+  {
+    "concept": "Advantages and costs",
+    "q": "Before leaving New Zealand, kuaka build up huge fat stores and their digestive organs shrink. Which statement is most correct?",
+    "options": [
+      "The fat is an energy investment that fuels a long non-stop flight",
+      "They build fat because they will feed regularly during the flight",
+      "The fat mainly insulates them from the cold at high altitude"
+    ],
+    "answer": 0,
+    "why": [
+      "Kuaka fly thousands of kilometres without stopping to feed. The fat they store beforehand is the energy investment that makes this possible, and shrinking the digestive organs reduces the weight they must carry.",
+      "Kuaka do not feed during their non-stop flight over the Pacific, which is exactly why they need such large stores before they leave.",
+      "Fat does provide some insulation, so this is partly right. However, its main role here is as fuel. Kuaka burn most of these stores during the journey."
+    ]
+  },
+  {
+    "concept": "Advantages and costs",
+    "q": "Migration involves large costs. Natural selection will only favour migration when",
+    "options": [
+      "the benefits for survival and reproduction outweigh the costs of the journey",
+      "the journey carries no risk of predators, storms or getting lost",
+      "the young can learn the route by following their parents"
+    ],
+    "answer": 0,
+    "why": [
+      "Migration uses huge amounts of energy and exposes animals to predators, storms and the risk of getting lost. It is only favoured when the gains, such as better food and breeding grounds and less competition, lead to greater overall survival and reproduction.",
+      "Every migration carries risks, so this would never happen. Migration persists because the benefits outweigh those risks, not because the risks are absent.",
+      "Some animals do learn routes from older individuals, so this is partly right. However, many migrate on an innate programme without guidance, so learning is not a requirement for migration to be favoured."
+    ]
+  },
+  {
+    "concept": "Control of migration",
+    "q": "Young pīpīwharauroa (shining cuckoos) are raised by riroriro (grey warblers), yet they migrate to Pacific islands without ever meeting an adult cuckoo. This shows that",
+    "options": [
+      "migration is learned by following older birds of the same species",
+      "they find the islands by kinesis, moving randomly until they arrive",
+      "the direction and timing of their migration are largely innate"
+    ],
+    "answer": 2,
+    "why": [
+      "These young cuckoos have no adult cuckoos to follow, and their foster parents, the riroriro, do not migrate. So they cannot have learned the route this way.",
+      "Random movement could not reliably bring birds across thousands of kilometres of ocean to specific islands. This migration is clearly directed.",
+      "Because the young cuckoos have never been shown the route, the information about when to go and which direction to fly must be inherited. This is strong evidence that migration is largely innate."
+    ]
+  },
+  {
+    "concept": "Control of migration",
+    "q": "Which cue most reliably tells many birds when to prepare for migration?",
+    "options": [
+      "A drop in temperature, because birds wait until it becomes cold",
+      "Food running out, because birds leave when they can no longer feed",
+      "Changing day length, which triggers hormonal changes and fat build-up"
+    ],
+    "answer": 2,
+    "why": [
+      "Temperature can play a part, so this is partly right. However, it varies from day to day and year to year, so it is a less reliable signal than day length.",
+      "Waiting until food runs out would leave birds too weak to build up the energy stores the journey needs. They need to prepare in advance.",
+      "Day length changes in the same way every year, making it a reliable cue. Changing day length triggers hormonal changes that cause fat build-up and restlessness, so birds are ready to leave before conditions worsen."
+    ]
+  },
+  {
+    "concept": "Navigation",
+    "q": "A bird using the sun as a compass also needs an internal biological clock. Why?",
+    "options": [
+      "The clock tells the bird how far it has already flown on its journey",
+      "The sun's position changes during the day, so the bird must adjust for the time",
+      "The sun is only visible at midday, so the clock tells the bird when to look"
+    ],
+    "answer": 1,
+    "why": [
+      "Knowing how long it has been flying could help judge distance, so this is partly right. However, for a sun compass, the clock's key role is correcting for the sun's movement across the sky.",
+      "The sun moves across the sky during the day. To keep a constant heading, the bird must know the time and allow for the sun's changing position. This is called time compensation.",
+      "The sun is visible throughout the day, not only at midday. The problem is that its position keeps changing."
+    ]
+  },
+  {
+    "concept": "Navigation",
+    "q": "On a heavily overcast night, many migrating birds can still keep a steady heading. The most likely reason is that they",
+    "options": [
+      "detect Earth's magnetic field and use it as a compass",
+      "use a star compass to steer by the night sky",
+      "follow the smell of the sea back to the coast"
+    ],
+    "answer": 0,
+    "why": [
+      "Many birds can detect Earth's magnetic field and use it as a compass. Because it does not depend on the sky, it works even when the sun and stars are hidden.",
+      "Many birds do use a star compass, so this is partly right. However, the stars are hidden on a heavily overcast night, so they cannot be used.",
+      "Some seabirds use smell to find feeding areas and colonies, so this is partly right. However, smell is not a reliable way to keep a steady heading over long distances."
+    ]
+  },
+  {
+    "concept": "Applying to context",
+    "q": "Adult longfin eels leave New Zealand rivers and travel thousands of kilometres into the tropical Pacific to spawn, then die. Their larvae drift back to New Zealand. Which statement is most correct?",
+    "options": [
+      "This is return migration, because adults travel back to their rivers each year",
+      "It is dispersal, because the larvae spread out across the ocean",
+      "Each adult makes a single spawning migration, because it breeds once and dies"
+    ],
+    "answer": 2,
+    "why": [
+      "Adult longfin eels do not return to New Zealand. They breed once in the tropical Pacific and then die, so there is no annual cycle.",
+      "The larvae do drift and spread, so this is partly right. However, the adults' journey to a specific spawning area at a set life stage is migration, not dispersal.",
+      "Longfin eels make one migration at the end of their lives, leaving their freshwater feeding grounds to reach distant breeding grounds. Because they spawn once and die, each eel makes this journey only once."
+    ]
+  }
+];
+
+const TIPS = {
+  "Defining migration": "Compare migration with dispersal and foraging, and practise describing return migration between breeding and feeding grounds.",
+  "Advantages and costs": "List the benefits (food, breeding grounds, less competition) and the costs (energy, predators, getting lost) of migration.",
+  "Control of migration": "Explain why day length is a reliable cue, and what young cuckoos show about migration being innate.",
+  "Navigation": "Review the sun compass and time compensation, the star compass, and how birds use Earth's magnetic field.",
+  "Applying to context": "Practise deciding whether a journey is return migration, a one-off migration or dispersal."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+let view = "quiz";
+
+const el = id => document.getElementById(id);
+const allDone = () => QUESTIONS.every((_, i) => results[i]);
+
+function buildNav() {
+  const nav = el("qnav");
+  nav.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const b = document.createElement("button");
+    b.textContent = i + 1;
+    b.setAttribute("aria-label", "Question " + (i + 1));
+    b.addEventListener("click", () => goTo(i));
+    nav.appendChild(b);
+  });
+  const r = document.createElement("button");
+  r.className = "results-btn";
+  r.id = "navResults";
+  r.textContent = "Results";
+  r.addEventListener("click", () => { if (allDone()) showResults(); });
+  nav.appendChild(r);
+}
+
+function updateNav() {
+  const buttons = el("qnav").querySelectorAll("button:not(.results-btn)");
+  buttons.forEach((b, i) => {
+    b.className = "";
+    if (results[i]) b.classList.add(results[i].correct ? "done-ok" : "done-no");
+    if (view === "quiz" && i === current) {
+      b.classList.add("current");
+      b.setAttribute("aria-current", "step");
+    } else {
+      b.removeAttribute("aria-current");
+    }
+  });
+  const r = el("navResults");
+  r.disabled = !allDone();
+  r.classList.toggle("current", view === "results");
+  r.title = allDone() ? "See your results" : "Answer all ten questions to unlock your results";
+}
+
+function goTo(i) {
+  current = i;
+  view = "quiz";
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+}
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("qText").innerHTML = item.q;
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+
+  if (results[current]) showAnswered(results[current].chosen, false);
+  updateNav();
+}
+
+function choose(i) {
+  if (results[current]) return;
+  results[current] = { chosen: i, correct: i === QUESTIONS[current].answer };
+  showAnswered(i, true);
+  updateNav();
+}
+
+function showAnswered(i, focusNext) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  el("options").querySelectorAll(".option").forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+
+  const next = el("nextBtn");
+  next.textContent = allDone() ? "See my results" : "Next question";
+  next.classList.remove("hidden");
+  if (focusNext) next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (allDone()) { showResults(); return; }
+  for (let step = 1; step <= QUESTIONS.length; step++) {
+    const i = (current + step) % QUESTIONS.length;
+    if (!results[i]) { goTo(i); el("qnav").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  }
+}
+
+function showResults() {
+  view = "results";
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of migration. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><p class="review-hint">Click any number above to look back at a question.</p><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  updateNav();
+  el("qnav").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  results = [];
+  goTo(0);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (view !== "quiz" || e.target.closest(".qnav")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  if (n !== -1 && !results[current]) choose(n % 3);
+});
+
+buildNav();
+render();
+</script>
+</body>
+</html>
