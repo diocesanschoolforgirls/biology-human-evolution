@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homing Quiz</title>
+<style>
+  :root {
+    /* Orange palette, matching the AS91603 Plant and Animal Responses slides */
+    --page: #FFF4E0;          /* page background */
+    --deep-forest: #FFF9EF;   /* feedback boxes, concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #FDE6C6;     /* letter circles, dividers */
+    --sea-mint: #EA580C;      /* orange accent */
+    --bright: #F59E0B;        /* amber */
+    --rust: #9A3412;          /* rust text accent */
+    --ivory-mint: #1E293B;    /* body text */
+    --sage-mist: #6B4E3D;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on orange fills */
+    --soft-moss: #9A3412;     /* button hover */
+    --heading: #1E293B;       /* headings */
+    --good: #2F7D4F;          /* correct */
+    --good-tint: #E4F3E9;
+    --rose: #B42318;          /* incorrect */
+    --rose-tint: #FDECEA;
+    --mint-tint: #E4F3E9;
+    --option-bg: #FFF8EC;
+    --track: #FCE3BE;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 0; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 10px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+  .label, h3 { color: var(--rust) !important; }
+  .option.correct { border-color: var(--good); background: var(--good-tint); }
+  .option.correct .letter { background: var(--good); color: #FFFFFF; }
+  .fb-box { border-left-color: var(--good); }
+  .fb-box .fb-head { color: var(--good) !important; }
+  .fb-box.wrong .fb-head { color: var(--rose) !important; }
+  .mark.ok { background: var(--good); }
+  .concept-score { color: var(--good); }
+  .letter { color: var(--rust); }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .option.wrong .letter { color: #FFFFFF; }
+
+  /* Question navigation */
+  .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 12px; }
+  .qnav button {
+    width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    border: 2px solid var(--pine-dark); background: var(--pine);
+    color: var(--sage-mist); font: inherit; font-size: 14px; font-weight: bold; line-height: 1;
+    cursor: pointer; transition: transform .15s ease, border-color .15s ease;
+  }
+  .qnav button:hover { border-color: var(--sea-mint); }
+  .qnav button:focus-visible { outline: 3px solid var(--bright); outline-offset: 2px; }
+  .qnav button.done-ok { background: var(--good-tint); border-color: var(--good); color: var(--good); }
+  .qnav button.done-no { background: var(--rose-tint); border-color: var(--rose); color: var(--rose); }
+  .qnav button.current { background: var(--sea-mint); border-color: var(--sea-mint); color: #FFFFFF; }
+  .qnav button.results-btn { width: auto; padding: 0 14px; border-radius: 16px; margin-left: auto; }
+  .qnav button.results-btn:disabled { opacity: .45; cursor: default; }
+  .qnav button.results-btn:disabled:hover { border-color: var(--pine-dark); }
+  @media (max-width: 520px) {
+    .qnav { gap: 5px; }
+    .qnav button { width: 28px; height: 28px; font-size: 13px; }
+    .qnav button.results-btn { margin-left: 0; height: 28px; }
+  }
+  .review-hint { margin: -4px 0 8px; font-size: 15px; color: var(--sage-mist); font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91603 · Plant and Animal Responses</div>
+    <div class="title-row">
+      <h1>Homing</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. Choose the most correct answer.</p>
+    <div class="divider"></div>
+  </header>
+
+  <nav class="qnav" id="qnav" aria-label="Choose a question"></nav>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    "concept": "Defining homing",
+    "q": "Which statement best describes homing?",
+    "options": [
+      "The seasonal movement of animals between breeding and feeding grounds",
+      "The ability to return to a specific home site after travelling or being moved away",
+      "Remaining within a defined area and defending it from others of the same species"
+    ],
+    "answer": 1,
+    "why": [
+      "Seasonal movement between breeding and feeding grounds is migration. Homing is about returning to one particular site.",
+      "Homing is the ability of an animal to find its way back to a specific place, such as a nest, roost, burrow or birthplace, after foraging trips, long journeys or being moved somewhere unfamiliar.",
+      "Remaining in and defending an area is territorial behaviour. Homing is about the ability to return to a site after leaving it."
+    ]
+  },
+  {
+    "concept": "Defining homing",
+    "q": "Toroa (northern royal albatross) return to the same nest site at Taiaroa Head after months at sea. Which statement comparing homing and migration is most correct?",
+    "options": [
+      "Homing returns an animal to one specific site, while migration is movement between general regions",
+      "Homing only happens over short distances, while migration covers long distances",
+      "Homing is always learned, while migration is always innate"
+    ],
+    "answer": 0,
+    "why": [
+      "The key feature of homing is returning to a precise location, such as one nest site. Migration describes movement between broad areas, such as breeding and feeding grounds. An animal like the toroa can show both.",
+      "Many homing journeys are short, so this is partly right. However, toroa home to a single nest site after travelling thousands of kilometres, so distance does not separate the two.",
+      "Both homing and migration involve a mix of innate and learned elements, so this is not a reliable difference. For example, salmon learn the smell of their home stream, but the drive to return is innate."
+    ]
+  },
+  {
+    "concept": "Navigation cues",
+    "q": "A wasp learns the landmarks around its nest before flying off. While it is away, a ring of pine cones around the nest is moved a short distance. On returning, the wasp searches in the centre of the moved ring. This shows the wasp",
+    "options": [
+      "uses Earth's magnetic field to locate the nest from a distance",
+      "uses the smell of the nest to find its entrance at close range",
+      "uses landmarks it learned around the nest to find its way"
+    ],
+    "answer": 2,
+    "why": [
+      "Moving the pine cones does not change the magnetic field, yet the wasp's search moved with the cones. The magnetic field cannot be the cue here.",
+      "Smell can help at close range, so this is partly right. However, the wasp searched where the cones were, not where the nest actually was, so it was guided by the landmarks rather than the nest's smell.",
+      "The wasp memorised the position of the nest relative to the pine cones. When the cones were moved, it searched in the matching position within the ring. This shows homing using learned landmarks, called piloting."
+    ]
+  },
+  {
+    "concept": "Navigation cues",
+    "q": "Chinook salmon in Canterbury rivers return from the ocean to the stream where they hatched. How do they find their home stream?",
+    "options": [
+      "They inherit a mental map of the river system from their parents",
+      "They use a sun compass to swim upstream until they reach their home stream",
+      "They follow the smell of their home stream, which they learned as juveniles"
+    ],
+    "answer": 2,
+    "why": [
+      "A map of a particular river system cannot be inherited. The salmon learn the information they need for their own stream early in life.",
+      "Salmon may use cues such as the sun or Earth's magnetic field to find the right coast while at sea, so this is partly right. However, choosing their exact home stream depends on smell.",
+      "As juveniles, salmon learn the unique chemical smell of their home stream. When they return as adults, they follow that smell upstream, choosing the correct branch at each junction."
+    ]
+  },
+  {
+    "concept": "Innate and learned",
+    "q": "Salmon learn the smell of their home stream during a short sensitive period early in life. Which statement about salmon homing is most correct?",
+    "options": [
+      "It combines learning in a sensitive period, called imprinting, with an innate drive to return",
+      "It is learned by trial and error, as salmon test different streams over many seasons",
+      "It is entirely innate, because the salmon never have to learn anything"
+    ],
+    "answer": 0,
+    "why": [
+      "Imprinting is learning that happens during a short sensitive period early in life. The salmon imprint on their stream's smell, and later an innate drive to return to breed makes use of that memory. Homing combines both.",
+      "Salmon do not test different streams over several seasons. Most breed only once, so there is no chance for trial and error.",
+      "The salmon must learn the particular smell of their own stream, so homing is not entirely innate."
+    ]
+  },
+  {
+    "concept": "Navigation cues",
+    "q": "Tītī (sooty shearwaters) return at night to their own burrows in crowded colonies. In experiments with related seabirds, birds that could not smell had trouble finding their burrows. The most likely cue is",
+    "options": [
+      "the smell of their own burrow",
+      "the position of the sun",
+      "landmarks around the colony"
+    ],
+    "answer": 0,
+    "why": [
+      "These seabirds have a strong sense of smell. Each burrow has its own scent, and birds that cannot smell struggle to find theirs, which shows smell guides them to their burrow in the dark.",
+      "The birds return at night, when the sun cannot be used.",
+      "Landmarks may help them reach the general area of the colony, so this is partly right. However, finding one burrow among thousands in the dark is difficult by sight, and the experiments point to smell."
+    ]
+  },
+  {
+    "concept": "True navigation",
+    "q": "True navigation means an animal can head towards home from an unfamiliar place. What does this require?",
+    "options": [
+      "A compass sense only, to keep travelling in one fixed direction towards home",
+      "A map sense to know where it is, and a compass sense to head home",
+      "Familiar landmarks only, to recognise the route home from any release site"
+    ],
+    "answer": 1,
+    "why": [
+      "A compass alone gives a direction but cannot tell the animal which direction home is from an unfamiliar place.",
+      "To head home from somewhere new, the animal must first work out where it is compared with home, using a map sense, and then use a compass sense, such as the sun or Earth's magnetic field, to set off in the right direction.",
+      "Landmarks are useful in familiar areas, so this is partly right. However, in an unfamiliar place there are no familiar landmarks, so they cannot explain true navigation."
+    ]
+  },
+  {
+    "concept": "True navigation",
+    "q": "Homing pigeons are released at an unfamiliar site far from their loft. Most fly off in the direction of home soon after release. Which conclusion is most correct?",
+    "options": [
+      "They search in random directions until they happen to recognise their loft",
+      "They follow landmarks that they remember from their earlier training flights",
+      "They can judge the direction of home without familiar landmarks"
+    ],
+    "answer": 2,
+    "why": [
+      "A random search would send the pigeons off in all directions. Most heading towards home soon after release shows their movement is directed.",
+      "Landmarks help pigeons in familiar areas, so this is partly right. However, the release site is unfamiliar, so remembered landmarks cannot explain their initial heading.",
+      "Because the site is unfamiliar, the pigeons must be working out where they are relative to home and choosing a direction, using cues such as the sun and Earth's magnetic field. This is evidence of true navigation."
+    ]
+  },
+  {
+    "concept": "Adaptive value",
+    "q": "Why is homing an advantage for many animals?",
+    "options": [
+      "Returning to the same site means they never have to compete with others",
+      "Returning to a known site with food, shelter or breeding success saves energy and reduces risk",
+      "Returning to the same site increases genetic diversity by mixing populations"
+    ],
+    "answer": 1,
+    "why": [
+      "Homing can secure a known site, so this is partly right. However, animals at a home site still compete, for example for mates, burrows and food.",
+      "A home site has already proven to be suitable, with food, shelter or successful breeding. Returning to it saves the time, energy and risk of searching for a new site, which improves survival and reproductive success.",
+      "Homing tends to keep individuals returning to the same place, which reduces mixing between populations rather than increasing it."
+    ]
+  },
+  {
+    "concept": "Adaptive value",
+    "q": "Because most salmon return to breed in the stream where they hatched, which outcome is most likely over many generations?",
+    "options": [
+      "Gene flow between streams increases, so all stream populations become more similar",
+      "Gene flow between streams is reduced, so populations can become adapted to their own stream",
+      "All the stream populations become genetically identical, because they share one ocean"
+    ],
+    "answer": 1,
+    "why": [
+      "Salmon returning to their own stream means fewer breed in other streams, so gene flow between streams falls, not rises.",
+      "With fewer salmon breeding outside their home stream, gene flow between stream populations is reduced. Each population is then shaped by the selection pressures of its own stream and can become locally adapted.",
+      "Feeding together in the ocean does not mix their genes, because breeding happens back in separate streams. Reduced gene flow tends to make stream populations more different, not identical."
+    ]
+  }
+];
+
+const TIPS = {
+  "Defining homing": "Compare homing (returning to a specific site) with migration (movement between regions) and territory.",
+  "Navigation cues": "Review the cues used for homing: landmarks (piloting), smell, the sun and Earth's magnetic field, with an example of each.",
+  "Innate and learned": "Explain imprinting as learning in a sensitive period, and how it combines with an innate drive to return.",
+  "True navigation": "Explain why true navigation needs both a map sense and a compass sense, and what displacement experiments show.",
+  "Adaptive value": "Link homing to saving energy and risk, and to reduced gene flow between populations."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+let view = "quiz";
+
+const el = id => document.getElementById(id);
+const allDone = () => QUESTIONS.every((_, i) => results[i]);
+
+function buildNav() {
+  const nav = el("qnav");
+  nav.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const b = document.createElement("button");
+    b.textContent = i + 1;
+    b.setAttribute("aria-label", "Question " + (i + 1));
+    b.addEventListener("click", () => goTo(i));
+    nav.appendChild(b);
+  });
+  const r = document.createElement("button");
+  r.className = "results-btn";
+  r.id = "navResults";
+  r.textContent = "Results";
+  r.addEventListener("click", () => { if (allDone()) showResults(); });
+  nav.appendChild(r);
+}
+
+function updateNav() {
+  const buttons = el("qnav").querySelectorAll("button:not(.results-btn)");
+  buttons.forEach((b, i) => {
+    b.className = "";
+    if (results[i]) b.classList.add(results[i].correct ? "done-ok" : "done-no");
+    if (view === "quiz" && i === current) {
+      b.classList.add("current");
+      b.setAttribute("aria-current", "step");
+    } else {
+      b.removeAttribute("aria-current");
+    }
+  });
+  const r = el("navResults");
+  r.disabled = !allDone();
+  r.classList.toggle("current", view === "results");
+  r.title = allDone() ? "See your results" : "Answer all ten questions to unlock your results";
+}
+
+function goTo(i) {
+  current = i;
+  view = "quiz";
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+}
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("qText").innerHTML = item.q;
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+
+  if (results[current]) showAnswered(results[current].chosen, false);
+  updateNav();
+}
+
+function choose(i) {
+  if (results[current]) return;
+  results[current] = { chosen: i, correct: i === QUESTIONS[current].answer };
+  showAnswered(i, true);
+  updateNav();
+}
+
+function showAnswered(i, focusNext) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  el("options").querySelectorAll(".option").forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+
+  const next = el("nextBtn");
+  next.textContent = allDone() ? "See my results" : "Next question";
+  next.classList.remove("hidden");
+  if (focusNext) next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (allDone()) { showResults(); return; }
+  for (let step = 1; step <= QUESTIONS.length; step++) {
+    const i = (current + step) % QUESTIONS.length;
+    if (!results[i]) { goTo(i); el("qnav").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  }
+}
+
+function showResults() {
+  view = "results";
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of homing. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><p class="review-hint">Click any number above to look back at a question.</p><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  updateNav();
+  el("qnav").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  results = [];
+  goTo(0);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (view !== "quiz" || e.target.closest(".qnav")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  if (n !== -1 && !results[current]) choose(n % 3);
+});
+
+buildNav();
+render();
+</script>
+</body>
+</html>
