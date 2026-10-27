@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methods of Speciation Quiz</title>
+<style>
+  :root {
+    --deep-forest: #1F3D33;
+    --pine: #2F5D4E;
+    --pine-dark: #295447;
+    --sea-mint: #4FAE8C;
+    --ivory-mint: #F2FAF6;
+    --sage-mist: #A8CBB7;
+    --deep-pine: #12241D;
+    --soft-moss: #7FA98A;
+    --rose: #D98C8C;
+    --rose-tint: #4A3434;
+    --mint-tint: #285F4C;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--deep-forest);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 22px; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--ivory-mint);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; opacity: .8; }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 12px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--deep-pine); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.18);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; }
+  .q-text em { font-weight: bold; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--deep-forest);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91605 · Evolutionary Processes</div>
+    <div class="title-row">
+      <h1>Methods of Speciation</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. Choose an answer to see why it is right or wrong.</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="progress-row" id="progressRow">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">Question 1 of 10</div>
+  </div>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    concept: "Reproductive isolation",
+    q: "A reproductive isolating mechanism (RIM) is",
+    options: [
+      "a barrier that reduces the size of a population",
+      "any mechanism that prevents individuals from interbreeding and producing fertile offspring",
+      "a mutation that changes the number of chromosomes in a gamete"
+    ],
+    answer: 1,
+    why: [
+      "A reduction in population size describes a bottleneck, not a RIM. A RIM is about whether individuals can interbreed, not how many individuals there are.",
+      "A RIM is any mechanism that prevents individuals from interbreeding and producing fertile offspring. By blocking interbreeding, a RIM stops gene flow, which allows populations to become separate species.",
+      "A change in chromosome number describes polyploidy or nondisjunction. Polyploidy can act as one type of isolating mechanism, but a RIM is the broader term for any barrier to interbreeding."
+    ]
+  },
+  {
+    concept: "Modes of speciation",
+    q: "During past ice ages, glaciers split South Island kiwi populations into separate areas. Over time, these populations became separate species. This is an example of",
+    options: [
+      "allopatric speciation",
+      "sympatric speciation",
+      "polyploidy"
+    ],
+    answer: 0,
+    why: [
+      "Allopatric speciation happens when a geographic barrier separates a population. The glaciers were a physical barrier that stopped gene flow between kiwi populations, so they diverged into separate species.",
+      "Sympatric speciation happens in the same geographic area, with no physical barrier. The kiwi populations were physically separated by glaciers, so this is not sympatric.",
+      "Polyploidy is a change in the number of chromosome sets that can create a new species in one generation. Nothing here involves a change in chromosome number. The populations were separated by a physical barrier."
+    ]
+  },
+  {
+    concept: "Gene flow",
+    q: "Once a geographic barrier separates two populations, they diverge genetically because",
+    options: [
+      "the barrier directly causes mutations in both populations",
+      "individuals choose to become different from the other population",
+      "with no gene flow, mutation, natural selection and genetic drift change allele frequencies independently in each population"
+    ],
+    answer: 2,
+    why: [
+      "A barrier does not cause mutations. Mutations arise randomly in both populations whether or not a barrier is present. The barrier matters because it stops those new alleles from being shared.",
+      "Individuals cannot choose their alleles. Divergence happens through processes acting on populations over many generations, not through decisions made by individuals.",
+      "Without gene flow, new alleles and changes in allele frequency are no longer shared between the populations. Different mutations arise, different selection pressures act, and genetic drift works differently in each population, so they become more and more genetically different."
+    ]
+  },
+  {
+    concept: "Modes of speciation",
+    q: "Sympatric speciation is speciation that",
+    options: [
+      "requires a mountain range or sea strait to separate populations",
+      "occurs within the same geographic area, with no physical barrier",
+      "only occurs in populations living on islands"
+    ],
+    answer: 1,
+    why: [
+      "A mountain range or sea strait is a geographic barrier, which describes allopatric speciation. Sympatric speciation does not need a physical barrier.",
+      "Sympatric speciation occurs in the same geographic area. Gene flow is reduced by other isolating mechanisms instead, such as using different microhabitats, breeding at different times, or polyploidy.",
+      "Island populations are often separated from the mainland by sea, which makes their speciation allopatric. Sympatric speciation is defined by sharing the same area, not by being on an island."
+    ]
+  },
+  {
+    concept: "Prezygotic RIMs",
+    q: "A prezygotic RIM is one that",
+    options: [
+      "prevents mating or fertilisation, so no zygote forms",
+      "acts after fertilisation, reducing the survival or fertility of hybrids",
+      "only occurs in plants"
+    ],
+    answer: 0,
+    why: [
+      "Pre means before, so a prezygotic RIM acts before a zygote forms. It stops individuals from mating, or stops sperm and egg from fusing. Habitat, temporal, behavioural, mechanical and gametic isolation are all prezygotic.",
+      "A RIM that acts after fertilisation is postzygotic. Postzygotic RIMs include hybrid inviability, hybrid sterility and hybrid breakdown.",
+      "Prezygotic RIMs occur in both plants and animals. Bird courtship songs and different breeding seasons in insects are both prezygotic RIMs in animals."
+    ]
+  },
+  {
+    concept: "Prezygotic RIMs",
+    q: "Two populations of a cicada live in the same forest. One population breeds in early summer and the other breeds in late summer. This RIM is",
+    options: [
+      "habitat isolation",
+      "behavioural isolation",
+      "temporal isolation"
+    ],
+    answer: 2,
+    why: [
+      "Habitat isolation is when populations use different habitats or microhabitats in the same area. Both cicada populations live in the same forest, so habitat is not the barrier here.",
+      "Behavioural isolation is when differences in courtship behaviour, such as songs or displays, prevent mating. The difference here is when they breed, not how they court.",
+      "Temporal isolation is when populations breed at different times of day or year. Because the two populations are ready to mate in different parts of summer, they rarely meet as mates, so gene flow is reduced."
+    ]
+  },
+  {
+    concept: "Prezygotic RIMs",
+    q: "Two closely related bird populations live in the same forest. Females only respond to males that sing their own population's song. This RIM is",
+    options: [
+      "behavioural isolation",
+      "gametic isolation",
+      "mechanical isolation"
+    ],
+    answer: 0,
+    why: [
+      "Behavioural isolation is when differences in courtship behaviour prevent mating. Females do not recognise the other population's song as a signal from a suitable mate, so the two populations do not interbreed.",
+      "Gametic isolation is when sperm and egg are incompatible, so fertilisation fails even if mating happens. Here mating never happens at all, because the females do not respond.",
+      "Mechanical isolation is when reproductive structures do not fit together physically. The barrier here is a difference in song, not in body structure."
+    ]
+  },
+  {
+    concept: "Postzygotic RIMs",
+    q: "A horse and a donkey mate and produce a mule. The mule is healthy but cannot produce viable gametes. This is an example of",
+    options: [
+      "hybrid inviability",
+      "hybrid sterility",
+      "hybrid breakdown"
+    ],
+    answer: 1,
+    why: [
+      "Hybrid inviability is when the hybrid fails to develop or dies before reaching reproductive age. The mule survives and is healthy, so this is not inviability.",
+      "Hybrid sterility is when the hybrid survives but cannot reproduce. The mule's chromosomes cannot pair properly in meiosis, so it cannot produce viable gametes and no genes pass back into either parent species.",
+      "Hybrid breakdown is when the first generation of hybrids is fertile, but their offspring are weak or sterile. The mule is sterile in the first generation, so this is not hybrid breakdown."
+    ]
+  },
+  {
+    concept: "Reinforcement",
+    q: "Where two diverging populations meet, their hybrids have low fitness. Natural selection favours individuals that mate only with their own population. This process is called",
+    options: [
+      "gene flow",
+      "genetic drift",
+      "reinforcement"
+    ],
+    answer: 2,
+    why: [
+      "Gene flow is the movement of alleles between populations through interbreeding. Here, selection is acting to reduce interbreeding, which reduces gene flow.",
+      "Genetic drift is a random change in allele frequency, most noticeable in small populations. The change described here is not random. It is driven by natural selection against low-fitness hybrids.",
+      "Reinforcement is when natural selection strengthens prezygotic isolation because hybrids have low fitness. Individuals that avoid producing weak hybrids leave more surviving offspring, so mating preferences become stronger over generations."
+    ]
+  },
+  {
+    concept: "Applying to context",
+    q: "Two groups of an insect live in the same orchard. They prefer different host fruits and emerge at slightly different times, but when they do mate, their offspring are fertile. These groups are best described as",
+    options: [
+      "two separate species, because they use different fruits",
+      "the same species, because gene flow can still occur between them",
+      "two separate species, because they emerge at different times"
+    ],
+    answer: 1,
+    why: [
+      "Using different fruits is habitat isolation, which reduces gene flow. However, the groups can still produce fertile offspring, so reproductive isolation is not yet complete.",
+      "A species is defined by the ability to interbreed and produce fertile offspring. These groups still do this, so gene flow continues between them. Their RIMs are reducing gene flow, which may be the early stage of sympatric speciation, but they are not yet separate species.",
+      "Emerging at different times is temporal isolation, which reduces how often the groups meet. Because they still produce fertile offspring when they do mate, they remain one species."
+    ]
+  }
+];
+
+const TIPS = {
+  "Reproductive isolation": "Practise defining a reproductive isolating mechanism in one sentence, and link it to stopping gene flow.",
+  "Modes of speciation": "Compare allopatric speciation (geographic barrier) with sympatric speciation (same area, no physical barrier), and give a New Zealand example of each.",
+  "Gene flow": "Explain why stopping gene flow lets mutation, natural selection and genetic drift change each population independently.",
+  "Prezygotic RIMs": "Learn the prezygotic RIMs (habitat, temporal, behavioural, mechanical, gametic) and practise matching each one to a scenario.",
+  "Postzygotic RIMs": "Distinguish hybrid inviability (hybrid dies), hybrid sterility (hybrid lives but cannot reproduce) and hybrid breakdown (later generations fail).",
+  "Reinforcement": "Review how low hybrid fitness lets natural selection strengthen prezygotic isolation over generations.",
+  "Applying to context": "Practise deciding whether two groups are separate species: can they still interbreed and produce fertile offspring?"
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+
+const el = id => document.getElementById(id);
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1);
+  el("qText").innerHTML = item.q;
+  el("progressText").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("progressFill").style.width = (current / QUESTIONS.length * 100) + "%";
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+  el("nextBtn").textContent = current === QUESTIONS.length - 1 ? "See my results" : "Next question";
+}
+
+function choose(i) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  results[current] = { chosen: i, correct };
+
+  const buttons = el("options").querySelectorAll(".option");
+  buttons.forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the right answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not quite. Here is why ' + LETTERS[i] + ' is incorrect.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is correct</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+  el("progressFill").style.width = ((current + 1) / QUESTIONS.length * 100) + "%";
+
+  const next = el("nextBtn");
+  next.classList.remove("hidden");
+  next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (current < QUESTIONS.length - 1) {
+    current++;
+    render();
+    el("quiz").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+  el("progressText").textContent = "Complete";
+  el("progressFill").style.width = "100%";
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of how new species form. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Speciation has a lot of new vocabulary. Work through the concept tips below, then have another go."; }
+
+  // Group by concept
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  res.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  current = 0;
+  results = [];
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (el("quiz").classList.contains("hidden")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  const buttons = el("options").querySelectorAll(".option");
+  if (n !== -1 && buttons.length && !buttons[0].disabled) choose(n % 3);
+});
+
+render();
+</script>
+</body>
+</html>
