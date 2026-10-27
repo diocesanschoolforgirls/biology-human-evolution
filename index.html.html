@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diocesan Science Resources</title>
+<style>
+  :root {
+    --deep-forest: #1F3D33;
+    --pine: #2F5D4E;
+    --pine-dark: #295447;
+    --sea-mint: #4FAE8C;
+    --ivory-mint: #F2FAF6;
+    --sage-mist: #A8CBB7;
+    --deep-pine: #12241D;
+    --soft-moss: #7FA98A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--deep-forest);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .label {
+    font-size: 13px; font-weight: bold; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 { font-family: Cambria, "Times New Roman", serif; font-size: 36px; margin: 4px 0 2px; }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; opacity: .8; }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 12px 0 26px; }
+  h2 {
+    font-family: Cambria, "Times New Roman", serif; font-size: 22px;
+    color: var(--sea-mint); margin: 28px 0 12px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  a.tile {
+    display: block; text-decoration: none; color: var(--ivory-mint);
+    background: var(--pine); border-radius: 16px; padding: 18px 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.18);
+    border: 2px solid transparent;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  a.tile:hover { border-color: var(--sea-mint); transform: translateY(-2px); }
+  a.tile:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .chip {
+    display: inline-block; background: var(--sea-mint); color: var(--deep-pine);
+    font-size: 12px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 8px;
+  }
+  .tile-title { font-family: Cambria, "Times New Roman", serif; font-size: 20px; font-weight: bold; }
+  .tile-sub { color: var(--sage-mist); font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="label">Diocesan School for Girls · Science</div>
+  <div class="title-row">
+    <h1>Interactive Resources</h1>
+    <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+  <p class="subtitle">Choose a quiz to start.</p>
+  <div class="divider"></div>
+
+  <h2>AS91605 · Evolutionary Processes</h2>
+  <div class="grid">
+    <a class="tile" href="methods-of-speciation-quiz.html">
+      <span class="chip">Quiz</span>
+      <div class="tile-title">Methods of Speciation</div>
+      <div class="tile-sub">10 questions</div>
+    </a>
+    <a class="tile" href="polyploidy-quiz.html">
+      <span class="chip">Quiz</span>
+      <div class="tile-title">Polyploidy</div>
+      <div class="tile-sub">10 questions</div>
+    </a>
+  </div>
+
+  <h2>AS91606 · Human Evolution</h2>
+  <div class="grid">
+    <a class="tile" href="out-of-africa-quiz.html">
+      <span class="chip">Quiz</span>
+      <div class="tile-title">Out of Africa Hypothesis</div>
+      <div class="tile-sub">10 questions</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>
