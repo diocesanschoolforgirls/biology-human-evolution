@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patterns of Evolution Quiz</title>
+<style>
+  :root {
+    /* Teal palette, matching the AS91605 Speciation activity slides */
+    --page: #E2F8F4;          /* page background */
+    --deep-forest: #F0FBF8;   /* feedback boxes, concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #D3F1EA;     /* letter circles, dividers */
+    --sea-mint: #0F766E;      /* deep teal accent */
+    --bright: #14B8A6;        /* bright teal */
+    --ivory-mint: #1E293B;    /* body text */
+    --sage-mist: #4A6461;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on teal fills */
+    --soft-moss: #115E59;     /* button hover */
+    --heading: #1E293B;       /* headings */
+    --rose: #B4534B;
+    --rose-tint: #FCEDEB;
+    --mint-tint: #D5F5EE;
+    --option-bg: #F1FAF8;
+    --track: #C9EEE6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 22px; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 12px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91605 · Evolutionary Processes</div>
+    <div class="title-row">
+      <h1>Patterns of Evolution</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. More than one answer may sound right, so choose the most correct one.</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="progress-row" id="progressRow">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">Question 1 of 10</div>
+  </div>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    concept: "Divergent evolution",
+    q: "Which statement best describes divergent evolution?",
+    options: [
+      "Unrelated species become more similar because they face similar selection pressures",
+      "Species that share a common ancestor become increasingly different over time",
+      "Related species become different only because of random genetic drift"
+    ],
+    answer: 1,
+    why: [
+      "Unrelated species becoming more similar is convergent evolution, the opposite pattern.",
+      "In divergent evolution, populations that share a common ancestor become increasingly different, usually because they face different selection pressures. Their shared ancestry shows up as homologous structures.",
+      "Genetic drift can contribute to divergence, so this is partly right. However, it is not the only cause. Natural selection under different selection pressures is usually the main driver."
+    ]
+  },
+  {
+    concept: "Divergent evolution",
+    q: "Kea and kākā share a common ancestor. Kea live in alpine areas and kākā live in lowland forest, and they now differ in behaviour, diet and plumage. This is best described as",
+    options: [
+      "divergent evolution",
+      "convergent evolution",
+      "adaptive radiation"
+    ],
+    answer: 0,
+    why: [
+      "Kea and kākā descend from a common ancestor and have become different as they adapted to different habitats, alpine and forest. Related species becoming more different is divergent evolution.",
+      "Convergent evolution makes unrelated species more similar. Kea and kākā are closely related and have become less similar, not more.",
+      "Adaptive radiation is a form of divergence, so this is partly right. However, it describes one lineage rapidly splitting into many species filling many niches. Two related species diverging is best described as divergent evolution."
+    ]
+  },
+  {
+    concept: "Adaptive radiation",
+    q: "Which statement best describes adaptive radiation?",
+    options: [
+      "Several unrelated species evolving similar features because they share the same habitat",
+      "The slow divergence of two species from a common ancestor over millions of years",
+      "One ancestral lineage rapidly giving rise to many species, each in a different niche"
+    ],
+    answer: 2,
+    why: [
+      "Unrelated species evolving similar features describes convergent evolution, not adaptive radiation.",
+      "Adaptive radiation does involve divergence from a common ancestor, so this is partly right. However, it describes many species forming relatively quickly, not two species diverging slowly.",
+      "In adaptive radiation, one ancestral lineage rapidly gives rise to many species. Each becomes adapted to a different niche, so the descendants vary widely in features such as feeding structures, size and habitat."
+    ]
+  },
+  {
+    concept: "Adaptive radiation",
+    q: "Why is adaptive radiation common when a species colonises an isolated island group such as New Zealand?",
+    options: [
+      "Many empty niches with little competition let different populations adapt in different ways",
+      "Island populations have higher mutation rates, which produce many new species",
+      "Islands have fewer selection pressures, so species are free to change at random"
+    ],
+    answer: 0,
+    why: [
+      "A colonising species often arrives where many niches are unoccupied and competition is low. Different populations are selected for different ways of living, such as feeding on different foods, so they diverge into many species.",
+      "Mutation rates are not higher on islands. Adaptive radiation is driven by opportunity, namely empty niches, combined with natural selection.",
+      "Islands still have strong selection pressures, so this is incorrect. The difference is that many niches are open, so selection pushes populations in many different directions, not in random ones."
+    ]
+  },
+  {
+    concept: "Convergent evolution",
+    q: "Sugar gliders (Australian marsupials) and flying squirrels (northern placental mammals) both glide using a skin membrane. Which statement is most correct?",
+    options: [
+      "This is divergent evolution, because they inherited the membrane from a shared ancestor",
+      "This is convergent evolution, because the membranes evolved independently under similar pressures",
+      "This is convergent evolution, so their DNA should show they are closely related"
+    ],
+    answer: 1,
+    why: [
+      "Marsupials and placental mammals separated long before gliding evolved in either group. Their common ancestor did not glide, so the membrane was not inherited.",
+      "Both species live in forests, where gliding between trees is an advantage. Similar selection pressures led to similar gliding membranes evolving independently, so the membranes are analogous structures.",
+      "Convergent evolution is the right term, so this is partly right. However, DNA would show they are only distantly related. Convergence makes distant relatives look alike, which is why DNA is used to check."
+    ]
+  },
+  {
+    concept: "Co-evolution",
+    q: "Which statement best describes co-evolution?",
+    options: [
+      "Two unrelated species evolving similar features independently",
+      "One species adapting to another species, which itself does not change",
+      "Two or more species each acting as a selection pressure on the other, so both change"
+    ],
+    answer: 2,
+    why: [
+      "Unrelated species evolving similar features independently is convergent evolution.",
+      "One species adapting to another is part of the picture, so this is partly right. However, co-evolution is reciprocal. Both species must change in response to each other.",
+      "In co-evolution, interacting species, such as a predator and its prey or a plant and its pollinator, each act as a selection pressure on the other. A change in one favours a change in the other, so they evolve together."
+    ]
+  },
+  {
+    concept: "Co-evolution",
+    q: "Young horoeka (lancewood) have stiff, narrow, toothed leaves until they grow taller than about 3 m, when their leaves change shape. Which explanation is most correct?",
+    options: [
+      "Moa browsing is thought to have been a selection pressure favouring tough leaves at heights moa could reach",
+      "Individual horoeka grew tougher leaves during their lifetime because moa kept eating them",
+      "Horoeka and moa show convergent evolution, because both evolved similar defensive features"
+    ],
+    answer: 0,
+    why: [
+      "Young horoeka with leaves that were hard for moa to eat were more likely to survive and reproduce, so those alleles became more common. The leaves change shape above about 3 m, beyond the reach of moa, which supports this idea. It is often given as an example of co-evolution between a plant and its browser.",
+      "Individuals cannot evolve during their lifetime in response to being eaten. The leaf form is inherited, and it became common through natural selection over many generations.",
+      "Convergent evolution involves unrelated species evolving similar features. Moa and horoeka did not evolve similar features. They interacted as browser and plant."
+    ]
+  },
+  {
+    concept: "Rate of evolution",
+    q: "Which statement best describes gradualism?",
+    options: [
+      "Long periods of little change, interrupted by short bursts of rapid change",
+      "Slow, steady change that accumulates over long periods of time",
+      "Change that happens only in small, isolated populations"
+    ],
+    answer: 1,
+    why: [
+      "Long periods of stability interrupted by rapid bursts of change describes punctuated equilibrium, not gradualism.",
+      "Gradualism proposes that species change slowly and steadily, with small changes accumulating over millions of years. The fossil record would then show a smooth series of intermediate forms.",
+      "Small, isolated populations can change quickly, which is linked to punctuated equilibrium. Gradualism is about a slow, steady rate of change, not population size."
+    ]
+  },
+  {
+    concept: "Rate of evolution",
+    q: "Which pattern in the fossil record best supports punctuated equilibrium?",
+    options: [
+      "A smooth series of intermediate forms showing steady change through each rock layer",
+      "Gaps in the record caused by soft-bodied organisms rarely fossilising",
+      "Species staying much the same for long periods, then new forms appearing relatively suddenly"
+    ],
+    answer: 2,
+    why: [
+      "A smooth series of intermediate forms is the pattern gradualism predicts, not punctuated equilibrium.",
+      "Gaps in the fossil record do exist, so this is partly right. However, poor fossilisation is a limitation of the evidence, not a pattern of evolution. Punctuated equilibrium explains a real pattern of stability followed by rapid change.",
+      "Punctuated equilibrium proposes long periods of stability (equilibrium), interrupted by short bursts of rapid change (punctuations), often linked to speciation. In the fossil record, this appears as species that stay the same for a long time, then are replaced relatively suddenly."
+    ]
+  },
+  {
+    concept: "Rate of evolution",
+    q: "Which statement comparing gradualism and punctuated equilibrium is most correct?",
+    options: [
+      "Both patterns can occur, because different lineages can change at different rates",
+      "Punctuated equilibrium has replaced gradualism, which is now rejected",
+      "Both describe the direction of evolution rather than its rate"
+    ],
+    answer: 0,
+    why: [
+      "Evidence shows that both patterns occur. Some lineages change slowly and steadily, while others stay stable for long periods and then change rapidly, for example during speciation by polyploidy.",
+      "Punctuated equilibrium did challenge the idea that all evolution is gradual, so this is partly right. However, gradualism has not been rejected. Many lineages show gradual change.",
+      "Gradualism and punctuated equilibrium both describe the rate, or tempo, of evolutionary change, not its direction. Direction is described by patterns such as divergent and convergent evolution."
+    ]
+  }
+];
+
+const TIPS = {
+  "Divergent evolution": "Explain how related species become different under different selection pressures, and link this to homologous structures.",
+  "Adaptive radiation": "Explain why one lineage can quickly diversify into many species when many empty niches are available.",
+  "Convergent evolution": "Practise explaining why distantly related species can evolve similar, analogous features under similar selection pressures.",
+  "Co-evolution": "Remember that co-evolution is reciprocal: each species acts as a selection pressure on the other.",
+  "Rate of evolution": "Compare gradualism (slow and steady) with punctuated equilibrium (stability, then rapid change), and know that both occur."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+
+const el = id => document.getElementById(id);
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1);
+  el("qText").innerHTML = item.q;
+  el("progressText").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("progressFill").style.width = (current / QUESTIONS.length * 100) + "%";
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+  el("nextBtn").textContent = current === QUESTIONS.length - 1 ? "See my results" : "Next question";
+}
+
+function choose(i) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  results[current] = { chosen: i, correct };
+
+  const buttons = el("options").querySelectorAll(".option");
+  buttons.forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+  el("progressFill").style.width = ((current + 1) / QUESTIONS.length * 100) + "%";
+
+  const next = el("nextBtn");
+  next.classList.remove("hidden");
+  next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (current < QUESTIONS.length - 1) {
+    current++;
+    render();
+    el("quiz").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+  el("progressText").textContent = "Complete";
+  el("progressFill").style.width = "100%";
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of the patterns of evolution. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  // Group by concept
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  res.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  current = 0;
+  results = [];
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (el("quiz").classList.contains("hidden")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  const buttons = el("options").querySelectorAll(".option");
+  if (n !== -1 && buttons.length && !buttons[0].disabled) choose(n % 3);
+});
+
+render();
+</script>
+</body>
+</html>
