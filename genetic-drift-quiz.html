@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genetic Drift, Founder Effect and Bottleneck Quiz</title>
+<style>
+  :root {
+    /* Teal palette, matching the AS91605 Speciation activity slides */
+    --page: #E2F8F4;          /* page background */
+    --deep-forest: #F0FBF8;   /* feedback boxes, concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #D3F1EA;     /* letter circles, dividers */
+    --sea-mint: #0F766E;      /* deep teal accent */
+    --bright: #14B8A6;        /* bright teal */
+    --ivory-mint: #1E293B;    /* body text */
+    --sage-mist: #4A6461;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on teal fills */
+    --soft-moss: #115E59;     /* button hover */
+    --heading: #1E293B;       /* headings */
+    --rose: #B4534B;
+    --rose-tint: #FCEDEB;
+    --mint-tint: #D5F5EE;
+    --option-bg: #F1FAF8;
+    --track: #C9EEE6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 22px; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 12px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91605 · Evolutionary Processes</div>
+    <div class="title-row">
+      <h1>Genetic Drift, Founder Effect and Bottleneck</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. More than one answer may sound right, so choose the most correct one.</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="progress-row" id="progressRow">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">Question 1 of 10</div>
+  </div>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    concept: "Genetic drift",
+    q: "Which statement best describes genetic drift?",
+    options: [
+      "A change in allele frequency caused by individuals with favourable alleles leaving more offspring",
+      "A random change in allele frequency from one generation to the next, caused by chance",
+      "A change in allele frequency that only happens after a population has crashed"
+    ],
+    answer: 1,
+    why: [
+      "A change caused by favourable alleles leaving more offspring is natural selection. Genetic drift also changes allele frequencies, but by chance, not because an allele improves fitness.",
+      "Genetic drift is a random change in allele frequency between generations. By chance, some individuals happen to reproduce more than others, so some alleles are passed on more often, regardless of whether they are useful.",
+      "Drift is strongest in small populations, such as after a crash, so this is partly right. However, drift happens in every population, every generation. Its effect is simply much smaller in large populations."
+    ]
+  },
+  {
+    concept: "Genetic drift",
+    q: "Why does genetic drift have a greater effect in small populations?",
+    options: [
+      "Chance events change allele proportions more when there are only a few individuals",
+      "Small populations have a higher mutation rate, which creates more random alleles",
+      "Natural selection cannot operate in small populations, so only chance is left"
+    ],
+    answer: 0,
+    why: [
+      "In a small population, the chance death or failure to breed of just a few individuals can remove a large share of an allele. In a large population, the same chance events barely change the overall proportions.",
+      "Mutation rate does not depend on population size, and drift is not caused by mutation. Drift is the random sampling of existing alleles each generation.",
+      "Natural selection still operates in small populations, so this goes too far. Drift can simply be strong enough to override selection, so a less useful allele can still increase by chance."
+    ]
+  },
+  {
+    concept: "Genetic drift",
+    q: "Which statement about genetic drift is most correct?",
+    options: [
+      "Drift always reduces the frequency of harmful alleles",
+      "Drift only removes rare alleles and never affects common ones",
+      "Drift can cause a harmful allele to increase in frequency"
+    ],
+    answer: 2,
+    why: [
+      "Removing harmful alleles is what natural selection tends to do. Drift is random, so it can just as easily increase a harmful allele as reduce it.",
+      "Rare alleles are the most likely to be lost by drift, so this is partly right. However, drift can change the frequency of any allele, and even a common allele can be lost in a very small population.",
+      "Because drift is random, it does not take an allele's effect on fitness into account. In a small population, a harmful allele can increase in frequency, or even become fixed, purely by chance."
+    ]
+  },
+  {
+    concept: "Founder effect",
+    q: "Which statement best describes the founder effect?",
+    options: [
+      "Reduced genetic diversity when a small group separates from a larger population and starts a new population",
+      "A sharp reduction in population size caused by a disaster such as disease or habitat loss",
+      "A new population that has the same allele frequencies as its source, because the founders were chosen at random"
+    ],
+    answer: 0,
+    why: [
+      "The founder effect occurs when a few individuals start a new population, such as on an island. They carry only a small sample of the original gene pool, so the new population has less diversity and different allele frequencies.",
+      "A sharp reduction in the size of an existing population describes the bottleneck effect. In the founder effect, the original population is not reduced. A small group leaves it.",
+      "The founders are a random sample, so this is partly right. However, a small random sample rarely matches the source exactly. Some alleles are over-represented, others under-represented, and some are missing altogether."
+    ]
+  },
+  {
+    concept: "Bottleneck effect",
+    q: "Which statement best describes the bottleneck effect?",
+    options: [
+      "A population that stays small for a long time because its habitat is limited",
+      "A disaster in which the strongest individuals survive and pass on their alleles",
+      "A sharp reduction in population size, leaving survivors that carry only part of the original gene pool"
+    ],
+    answer: 2,
+    why: [
+      "A population that stays small will be strongly affected by drift, so this is partly right. However, a bottleneck refers to a sudden, sharp reduction in size, not a population that has always been small.",
+      "Survival in a bottleneck event is mostly a matter of chance, not strength. If survivors were chosen by their traits, that would be natural selection.",
+      "In a bottleneck, an event such as disease, hunting or habitat loss suddenly reduces the population. The few survivors carry only part of the original gene pool, so genetic diversity falls, even if numbers later recover."
+    ]
+  },
+  {
+    concept: "Bottleneck effect",
+    q: "By 1980 only five black robins survived, with just one breeding pair, Old Blue and Old Yellow. The population has since grown to a few hundred. Which statement is most correct?",
+    options: [
+      "Genetic diversity has returned to its original level, because the population has grown",
+      "The population still has very low genetic diversity, because every bird descends from one pair",
+      "The population is now genetically healthy, because natural selection has removed harmful alleles"
+    ],
+    answer: 1,
+    why: [
+      "Numbers have recovered, but genetic diversity has not. New alleles only arise slowly through mutation, so a population that grows from one pair still carries only that pair's alleles.",
+      "The black robin passed through an extreme bottleneck. Because all living birds descend from Old Blue and Old Yellow, the population carries only the alleles those two birds had, so genetic diversity remains very low even though numbers have grown.",
+      "Natural selection may remove some harmful alleles over time, so this is partly right. However, selection cannot restore lost diversity, and in a population this small, drift can override selection."
+    ]
+  },
+  {
+    concept: "Comparing processes",
+    q: "What is the key difference between the founder effect and the bottleneck effect?",
+    options: [
+      "In the founder effect a small group starts a new population, while in a bottleneck the existing population itself is sharply reduced",
+      "The founder effect reduces genetic diversity, but a bottleneck does not",
+      "A bottleneck is caused by chance, while the founder effect is caused by natural selection"
+    ],
+    answer: 0,
+    why: [
+      "Both processes leave a small number of individuals carrying part of the original gene pool. The difference is how it happens: founders leave and start a new population, while a bottleneck shrinks the original population itself.",
+      "Both processes reduce genetic diversity, so this is incorrect. In each case, only a small sample of the original alleles is carried forward.",
+      "Both processes are driven by chance. Which individuals become founders, and which survive a bottleneck event, is largely random rather than based on fitness."
+    ]
+  },
+  {
+    concept: "Comparing processes",
+    q: "A storm carries ten skinks from a large mainland population to an uninhabited offshore island, where they start a new population. The mainland population is unaffected. This is an example of",
+    options: [
+      "the bottleneck effect",
+      "gene flow",
+      "the founder effect"
+    ],
+    answer: 2,
+    why: [
+      "A bottleneck is a sharp reduction in an existing population. Here the mainland population is unaffected, and a new population is started instead.",
+      "Alleles have moved to a new place, so this is partly right. However, gene flow is the ongoing exchange of alleles between populations that interbreed. Once the skinks are on the island, there is no further exchange with the mainland.",
+      "A small group has left the original population and started a new one. The ten skinks carry only a small sample of the mainland gene pool, so the island population begins with reduced diversity and different allele frequencies."
+    ]
+  },
+  {
+    concept: "Consequences",
+    q: "Why are populations that have been through a bottleneck or founder event at greater risk of extinction?",
+    options: [
+      "Small populations cannot produce offspring fast enough to recover",
+      "Low genetic diversity leaves fewer alleles for natural selection to act on when conditions change, such as when a new disease arrives",
+      "Inbreeding creates new harmful mutations in the population"
+    ],
+    answer: 1,
+    why: [
+      "Slow recovery can be a risk, so this is partly right. However, it is not a genetic explanation, and many small populations do grow quickly. The genetic risk comes from lost diversity.",
+      "With fewer alleles in the gene pool, the population is less likely to contain individuals able to survive a new selection pressure, such as a disease or a change in climate. This makes the whole population more vulnerable.",
+      "Inbreeding is a real problem in small populations, so this is partly right. However, inbreeding does not create new mutations. It increases the chance that offspring inherit two copies of harmful recessive alleles that already exist."
+    ]
+  },
+  {
+    concept: "Links to speciation",
+    q: "How can the founder effect contribute to speciation?",
+    options: [
+      "The founders become a new species immediately, because they are a small, separate group",
+      "The founder effect increases genetic diversity, which gives natural selection more variation to work with",
+      "The new population starts with different allele frequencies, and without gene flow, drift and selection drive further divergence"
+    ],
+    answer: 2,
+    why: [
+      "Being small and separate does not make a population a new species. The founders can still interbreed with the source population if they meet. Speciation requires divergence until reproductive isolation develops.",
+      "The founder effect reduces genetic diversity, not increases it. It contributes to speciation by changing allele frequencies, not by adding variation.",
+      "The founders begin with allele frequencies that already differ from the source population. With no gene flow, mutation, genetic drift and natural selection act on the new population independently, and over many generations it may become reproductively isolated."
+    ]
+  }
+];
+
+const TIPS = {
+  "Genetic drift": "Define genetic drift as a random change in allele frequency, and explain why its effect is strongest in small populations.",
+  "Founder effect": "Practise describing how a small group starting a new population carries only a sample of the original gene pool.",
+  "Bottleneck effect": "Explain why genetic diversity stays low after a bottleneck, even when population numbers recover.",
+  "Comparing processes": "Compare the founder effect and the bottleneck effect: how each happens, and what they have in common.",
+  "Consequences": "Link low genetic diversity to inbreeding and to a reduced ability to adapt to new selection pressures.",
+  "Links to speciation": "Trace the steps from a founder event to changed allele frequencies, no gene flow, divergence and reproductive isolation."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+
+const el = id => document.getElementById(id);
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1);
+  el("qText").innerHTML = item.q;
+  el("progressText").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("progressFill").style.width = (current / QUESTIONS.length * 100) + "%";
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+  el("nextBtn").textContent = current === QUESTIONS.length - 1 ? "See my results" : "Next question";
+}
+
+function choose(i) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  results[current] = { chosen: i, correct };
+
+  const buttons = el("options").querySelectorAll(".option");
+  buttons.forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+  el("progressFill").style.width = ((current + 1) / QUESTIONS.length * 100) + "%";
+
+  const next = el("nextBtn");
+  next.classList.remove("hidden");
+  next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (current < QUESTIONS.length - 1) {
+    current++;
+    render();
+    el("quiz").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+  el("progressText").textContent = "Complete";
+  el("progressFill").style.width = "100%";
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of genetic drift, the founder effect and the bottleneck effect. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  // Group by concept
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  res.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  current = 0;
+  results = [];
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (el("quiz").classList.contains("hidden")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  const buttons = el("options").querySelectorAll(".option");
+  if (n !== -1 && buttons.length && !buttons[0].disabled) choose(n % 3);
+});
+
+render();
+</script>
+</body>
+</html>
