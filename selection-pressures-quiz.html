@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selection Pressures Quiz</title>
+<style>
+  :root {
+    /* Teal palette, matching the AS91605 Speciation activity slides */
+    --page: #E2F8F4;          /* page background */
+    --deep-forest: #F0FBF8;   /* feedback boxes, concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #D3F1EA;     /* letter circles, dividers */
+    --sea-mint: #0F766E;      /* deep teal accent */
+    --bright: #14B8A6;        /* bright teal */
+    --ivory-mint: #1E293B;    /* body text */
+    --sage-mist: #4A6461;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on teal fills */
+    --soft-moss: #115E59;     /* button hover */
+    --heading: #1E293B;       /* headings */
+    --rose: #B4534B;
+    --rose-tint: #FCEDEB;
+    --mint-tint: #D5F5EE;
+    --option-bg: #F1FAF8;
+    --track: #C9EEE6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 22px; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 12px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91605 · Evolutionary Processes</div>
+    <div class="title-row">
+      <h1>Selection Pressures</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. More than one answer may sound right, so choose the most correct one.</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="progress-row" id="progressRow">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">Question 1 of 10</div>
+  </div>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    concept: "Selection pressures",
+    q: "Which statement best describes a selection pressure?",
+    options: [
+      "A change in the environment that causes individuals to develop new adaptations",
+      "Any biotic or abiotic factor that affects which individuals survive and reproduce",
+      "A predator or disease that reduces the size of a population"
+    ],
+    answer: 1,
+    why: [
+      "Selection pressures do change environments, but they do not cause individuals to develop new adaptations. The variation must already exist in the population. The pressure decides which existing variants survive and reproduce.",
+      "A selection pressure is any biotic or abiotic factor that affects which individuals survive and reproduce. Because survival and reproduction are uneven, some alleles are passed on more often than others.",
+      "Predators and disease are real examples of biotic selection pressures, so this is partly right. However, it is too narrow, because abiotic factors such as temperature also count. The key idea is not that the population shrinks, but that some individuals survive and reproduce more than others."
+    ]
+  },
+  {
+    concept: "Fitness and variation",
+    q: "In natural selection, the fitness of an individual is best described as",
+    options: [
+      "its physical strength and health compared with others in the population",
+      "how long it survives in its environment",
+      "its ability to survive and pass its alleles on to the next generation"
+    ],
+    answer: 2,
+    why: [
+      "Strength and health may help an individual survive, but they are not what fitness means in biology. A strong individual that never reproduces has a fitness of zero.",
+      "Survival is part of fitness, so this is close. However, a long-lived individual that leaves no offspring contributes nothing to the next generation. Reproduction is the key part this option leaves out.",
+      "Fitness is an individual's ability to survive and reproduce, passing its alleles to the next generation. Individuals with higher fitness contribute more alleles to the gene pool, which is how allele frequencies change."
+    ]
+  },
+  {
+    concept: "Fitness and variation",
+    q: "What is the original source of new alleles in a population?",
+    options: [
+      "Mutation",
+      "Sexual reproduction, through crossing over and independent assortment in meiosis",
+      "Natural selection, which favours individuals with useful traits"
+    ],
+    answer: 0,
+    why: [
+      "Mutation is a change in the DNA sequence, and it is the only process that creates brand new alleles. All other sources of variation work by shuffling alleles that mutation has already produced.",
+      "Sexual reproduction is an important source of variation, so this is partly right. However, crossing over and independent assortment create new combinations of existing alleles. They do not create new alleles.",
+      "Natural selection acts on variation that already exists. It changes how common alleles are, but it does not create new ones."
+    ]
+  },
+  {
+    concept: "Natural selection",
+    q: "Which statement best describes how natural selection changes a population over time?",
+    options: [
+      "Individuals gradually change during their lifetime to become better suited to their environment",
+      "The most favourable allele always replaces every other allele in the gene pool",
+      "Alleles that increase fitness become more frequent in the gene pool over many generations"
+    ],
+    answer: 2,
+    why: [
+      "Individuals do not evolve during their lifetime. Natural selection changes populations across generations, as individuals with favourable alleles leave more offspring.",
+      "Favourable alleles do become more common, so this is partly right. However, they do not always replace every other allele. Under stabilising or disruptive selection, several alleles can remain in the gene pool, and conditions can change before any allele takes over.",
+      "Natural selection works on populations, not individuals. Individuals with alleles that increase fitness leave more offspring, so those alleles become more frequent in the gene pool, generation after generation."
+    ]
+  },
+  {
+    concept: "Modes of selection",
+    q: "Which outcome is expected when stabilising selection acts on a trait?",
+    options: [
+      "The average stays the same and variation decreases",
+      "The average stays the same and variation increases",
+      "The average shifts and variation decreases"
+    ],
+    answer: 0,
+    why: [
+      "In stabilising selection, the intermediate phenotype is favoured and both extremes are selected against. The average stays the same, and because the extremes are removed, variation in the population decreases.",
+      "The average can stay the same under disruptive selection too, so this is partly right. However, an increase in variation is the outcome of disruptive selection, where both extremes are favoured. Stabilising selection removes the extremes, so variation decreases.",
+      "A shift in the average is the outcome of directional selection, where one extreme is favoured. Variation can fall under directional selection as well, but the average does not move under stabilising selection."
+    ]
+  },
+  {
+    concept: "Modes of selection",
+    q: "Pale Canterbury geckos survive better on exposed rock, and dark, patterned geckos survive better in shrubland. Geckos with intermediate colouring are preyed on in both habitats. Which statement is most correct?",
+    options: [
+      "This is directional selection, because predators are selecting for particular colours",
+      "This is disruptive selection, and variation in colour within the population will increase over time",
+      "This is disruptive selection, and the pale and dark geckos have become separate species"
+    ],
+    answer: 1,
+    why: [
+      "Predators are selecting for particular colours, but directional selection favours only one extreme and shifts the average one way. Here two extremes are favoured at once, so this is not directional selection.",
+      "Both extremes are favoured and the intermediates are selected against, which is disruptive selection. Alleles for pale and dark colouring both increase while intermediates become rarer, so variation in the population increases.",
+      "The mode is correct, so this is partly right. However, disruptive selection on its own does not make separate species. The pale and dark geckos can still interbreed, so gene flow continues. Speciation would also need reproductive isolation."
+    ]
+  },
+  {
+    concept: "Modes of selection",
+    q: "Which example is best explained by directional selection?",
+    options: [
+      "Birds that lay a medium number of eggs leave the most surviving offspring",
+      "A plant population develops early-flowering and late-flowering forms, with few plants flowering in between",
+      "A bacterial population becomes more resistant to an antibiotic over many generations"
+    ],
+    answer: 2,
+    why: [
+      "Medium clutches being favoured over very small and very large ones is stabilising selection. The intermediate is favoured and the average stays the same.",
+      "Two extremes being favoured while the intermediate becomes rare is disruptive selection, not directional selection.",
+      "The antibiotic kills the least resistant bacteria, so the most resistant ones survive and reproduce. One extreme is favoured and the average resistance shifts in that direction each generation, which is directional selection."
+    ]
+  },
+  {
+    concept: "Changing pressures",
+    q: "The tūturiwhatu (New Zealand dotterel) has cryptic plumage that hid it from aerial predators hunting by sight. Introduced stoats and cats hunt mainly by scent. Which statement is most correct?",
+    options: [
+      "The plumage now gives little protection because the selection pressure has changed, and natural selection cannot respond within a few generations",
+      "The dotterel will quickly evolve new adaptations to escape the new predators",
+      "The plumage is now a disadvantage, so it will be selected against"
+    ],
+    answer: 0,
+    why: [
+      "Camouflage works against predators that hunt by sight, but not against those that hunt by scent, so the selection pressure has changed. Natural selection works over many generations and needs suitable variation to already exist, so it cannot keep pace with such a sudden change.",
+      "New adaptations cannot appear on demand. Natural selection can only act on variation already in the population, and it takes many generations. Introduced predators arrived far too quickly for this.",
+      "The plumage no longer helps against mammal predators, but it does not make survival worse. It still hides the birds from aerial predators. Something is only selected against if it lowers fitness."
+    ]
+  },
+  {
+    concept: "Selection pressures",
+    q: "Which list contains only abiotic selection pressures?",
+    options: [
+      "Temperature, competition and disease",
+      "Rainfall, wind exposure and parasites",
+      "Temperature, rainfall and soil salinity"
+    ],
+    answer: 2,
+    why: [
+      "Temperature is abiotic, but competition and disease both involve other living organisms, so they are biotic.",
+      "Rainfall and wind exposure are abiotic, so this is close. However, parasites are living organisms, which makes them a biotic selection pressure.",
+      "Temperature, rainfall and soil salinity are all non-living features of the environment, so all three are abiotic selection pressures."
+    ]
+  },
+  {
+    concept: "Links to speciation",
+    q: "Why can different selection pressures acting on two separated populations eventually lead to speciation?",
+    options: [
+      "Each population gains the same mutations, which selection then removes",
+      "Different alleles are favoured in each environment, so the gene pools diverge until the populations can no longer interbreed",
+      "The selection pressures cause individuals to stop choosing mates from the other population"
+    ],
+    answer: 1,
+    why: [
+      "Mutations arise randomly, so separated populations do not gain the same mutations. Selection keeps favourable alleles as well as removing harmful ones.",
+      "With no gene flow between them, each population's gene pool is shaped by its own selection pressures. Different alleles become common in each, and over many generations the differences can become large enough that the populations are reproductively isolated.",
+      "Reproductive isolation is the end point of speciation, so this is partly right. However, selection pressures do not make individuals choose. The isolation develops as the gene pools diverge over many generations."
+    ]
+  }
+];
+
+const TIPS = {
+  "Selection pressures": "Practise defining a selection pressure, and sort examples into biotic (living) and abiotic (non-living).",
+  "Fitness and variation": "Remember that fitness means survival and reproduction, and that mutation is the only source of new alleles.",
+  "Natural selection": "Explain natural selection as a change in allele frequency in a population over generations, not a change in individuals.",
+  "Modes of selection": "Sketch stabilising, directional and disruptive selection, and note what happens to the average and to variation in each.",
+  "Changing pressures": "Explain why an adaptation can lose its value when a selection pressure changes faster than selection can respond.",
+  "Links to speciation": "Link different selection pressures to diverging gene pools, and then to reproductive isolation."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+
+const el = id => document.getElementById(id);
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1);
+  el("qText").innerHTML = item.q;
+  el("progressText").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("progressFill").style.width = (current / QUESTIONS.length * 100) + "%";
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+  el("nextBtn").textContent = current === QUESTIONS.length - 1 ? "See my results" : "Next question";
+}
+
+function choose(i) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  results[current] = { chosen: i, correct };
+
+  const buttons = el("options").querySelectorAll(".option");
+  buttons.forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+  el("progressFill").style.width = ((current + 1) / QUESTIONS.length * 100) + "%";
+
+  const next = el("nextBtn");
+  next.classList.remove("hidden");
+  next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (current < QUESTIONS.length - 1) {
+    current++;
+    render();
+    el("quiz").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+  el("progressText").textContent = "Complete";
+  el("progressFill").style.width = "100%";
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of selection pressures. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  // Group by concept
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  res.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  current = 0;
+  results = [];
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (el("quiz").classList.contains("hidden")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  const buttons = el("options").querySelectorAll(".option");
+  if (n !== -1 && buttons.length && !buttons[0].disabled) choose(n % 3);
+});
+
+render();
+</script>
+</body>
+</html>
