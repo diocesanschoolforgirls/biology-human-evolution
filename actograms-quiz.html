@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Actograms Quiz</title>
+<style>
+  :root {
+    /* Orange palette, matching the AS91603 Plant and Animal Responses slides */
+    --page: #FFF4E0;          /* page background */
+    --deep-forest: #FFF9EF;   /* feedback boxes, concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #FDE6C6;     /* letter circles, dividers */
+    --sea-mint: #EA580C;      /* orange accent */
+    --bright: #F59E0B;        /* amber */
+    --rust: #9A3412;          /* rust text accent */
+    --ivory-mint: #1E293B;    /* body text */
+    --sage-mist: #6B4E3D;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on orange fills */
+    --soft-moss: #9A3412;     /* button hover */
+    --heading: #1E293B;       /* headings */
+    --good: #2F7D4F;          /* correct */
+    --good-tint: #E4F3E9;
+    --rose: #B42318;          /* incorrect */
+    --rose-tint: #FDECEA;
+    --mint-tint: #E4F3E9;
+    --option-bg: #FFF8EC;
+    --track: #FCE3BE;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 0; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 10px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+  .label, h3 { color: var(--rust) !important; }
+  .option.correct { border-color: var(--good); background: var(--good-tint); }
+  .option.correct .letter { background: var(--good); color: #FFFFFF; }
+  .fb-box { border-left-color: var(--good); }
+  .fb-box .fb-head { color: var(--good) !important; }
+  .fb-box.wrong .fb-head { color: var(--rose) !important; }
+  .mark.ok { background: var(--good); }
+  .concept-score { color: var(--good); }
+  .letter { color: var(--rust); }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .option.wrong .letter { color: #FFFFFF; }
+
+  /* Question navigation */
+  .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 12px; }
+  .qnav button {
+    width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    border: 2px solid var(--pine-dark); background: var(--pine);
+    color: var(--sage-mist); font: inherit; font-size: 14px; font-weight: bold; line-height: 1;
+    cursor: pointer; transition: transform .15s ease, border-color .15s ease;
+  }
+  .qnav button:hover { border-color: var(--sea-mint); }
+  .qnav button:focus-visible { outline: 3px solid var(--bright); outline-offset: 2px; }
+  .qnav button.done-ok { background: var(--good-tint); border-color: var(--good); color: var(--good); }
+  .qnav button.done-no { background: var(--rose-tint); border-color: var(--rose); color: var(--rose); }
+  .qnav button.current { background: var(--sea-mint); border-color: var(--sea-mint); color: #FFFFFF; }
+  .qnav button.results-btn { width: auto; padding: 0 14px; border-radius: 16px; margin-left: auto; }
+  .qnav button.results-btn:disabled { opacity: .45; cursor: default; }
+  .qnav button.results-btn:disabled:hover { border-color: var(--pine-dark); }
+  @media (max-width: 520px) {
+    .qnav { gap: 5px; }
+    .qnav button { width: 28px; height: 28px; font-size: 13px; }
+    .qnav button.results-btn { margin-left: 0; height: 28px; }
+  }
+  .review-hint { margin: -4px 0 8px; font-size: 15px; color: var(--sage-mist); font-style: italic; }
+  .fig { margin: -6px 0 16px; background: #FFFFFF; border: 1px solid var(--pine-dark); border-radius: 12px; padding: 10px 12px 4px; }
+  .fig svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91603 · Plant and Animal Responses</div>
+    <div class="title-row">
+      <h1>Actograms</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. Choose the most correct answer.</p>
+    <div class="divider"></div>
+  </header>
+
+  <nav class="qnav" id="qnav" aria-label="Choose a question"></nav>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="fig" id="fig"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const FIGS = {"noct": "<svg viewBox=\"0 0 560 234\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Actogram: activity during the dark period each day\" font-family=\"Calibri, Segoe UI, Arial, sans-serif\"><text x=\"56.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">00:00</text><line x1=\"56.0\" y1=\"44\" x2=\"56.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"179.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">06:00</text><line x1=\"179.0\" y1=\"44\" x2=\"179.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"302.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">12:00</text><line x1=\"302.0\" y1=\"44\" x2=\"302.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"425.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">18:00</text><line x1=\"425.0\" y1=\"44\" x2=\"425.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"548.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">24:00</text><line x1=\"548.0\" y1=\"44\" x2=\"548.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"48\" y=\"30\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Light</text><rect x=\"56\" y=\"20\" width=\"492.0\" height=\"12\" fill=\"#FFFFFF\" stroke=\"#1E293B\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><text x=\"48\" y=\"59\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 1</text><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"445.5\" y=\"50\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"50\" width=\"97.4\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"78\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 2</text><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"450.6\" y=\"69\" width=\"97.4\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"69\" width=\"87.1\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"97\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 3</text><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"440.4\" y=\"88\" width=\"107.6\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"88\" width=\"94.3\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"116\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 4</text><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"447.6\" y=\"107\" width=\"100.4\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"107\" width=\"90.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"135\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 5</text><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"443.4\" y=\"126\" width=\"104.6\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"126\" width=\"96.4\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"154\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 6</text><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"143\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"143\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"449.6\" y=\"145\" width=\"98.4\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"145\" width=\"89.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"173\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 7</text><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"162\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"162\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"442.4\" y=\"164\" width=\"105.6\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"164\" width=\"93.3\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"192\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 8</text><rect x=\"56\" y=\"181\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"181\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"181\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"446.5\" y=\"183\" width=\"101.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"183\" width=\"95.3\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56\" y=\"211\" width=\"18\" height=\"10\" fill=\"#1E293B\"/><text x=\"80\" y=\"220\" font-size=\"11\" fill=\"#6B4E3D\">Activity</text><rect x=\"146\" y=\"211\" width=\"18\" height=\"10\" fill=\"#E9D3B4\" stroke=\"#F1D9B8\"/><text x=\"170\" y=\"220\" font-size=\"11\" fill=\"#6B4E3D\">Dark</text></svg>", "diur": "<svg viewBox=\"0 0 560 234\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Actogram: activity during the light period each day\" font-family=\"Calibri, Segoe UI, Arial, sans-serif\"><text x=\"56.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">00:00</text><line x1=\"56.0\" y1=\"44\" x2=\"56.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"179.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">06:00</text><line x1=\"179.0\" y1=\"44\" x2=\"179.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"302.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">12:00</text><line x1=\"302.0\" y1=\"44\" x2=\"302.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"425.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">18:00</text><line x1=\"425.0\" y1=\"44\" x2=\"425.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"548.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">24:00</text><line x1=\"548.0\" y1=\"44\" x2=\"548.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"48\" y=\"30\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Light</text><rect x=\"56\" y=\"20\" width=\"492.0\" height=\"12\" fill=\"#FFFFFF\" stroke=\"#1E293B\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><text x=\"48\" y=\"59\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 1</text><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"199.5\" y=\"50\" width=\"199.9\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"78\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 2</text><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"204.6\" y=\"69\" width=\"201.9\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"97\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 3</text><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"194.4\" y=\"88\" width=\"208.1\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"116\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 4</text><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"201.5\" y=\"107\" width=\"207.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"135\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 5</text><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"197.5\" y=\"126\" width=\"204.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"154\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 6</text><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"143\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"143\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"203.6\" y=\"145\" width=\"201.9\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"173\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 7</text><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"162\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"162\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"196.4\" y=\"164\" width=\"211.1\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"192\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 8</text><rect x=\"56\" y=\"181\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"181\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"181\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"200.5\" y=\"183\" width=\"199.9\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56\" y=\"211\" width=\"18\" height=\"10\" fill=\"#1E293B\"/><text x=\"80\" y=\"220\" font-size=\"11\" fill=\"#6B4E3D\">Activity</text><rect x=\"146\" y=\"211\" width=\"18\" height=\"10\" fill=\"#E9D3B4\" stroke=\"#F1D9B8\"/><text x=\"170\" y=\"220\" font-size=\"11\" fill=\"#6B4E3D\">Dark</text></svg>", "crep": "<svg viewBox=\"0 0 560 234\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Actogram: activity around dawn and dusk each day\" font-family=\"Calibri, Segoe UI, Arial, sans-serif\"><text x=\"56.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">00:00</text><line x1=\"56.0\" y1=\"44\" x2=\"56.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"179.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">06:00</text><line x1=\"179.0\" y1=\"44\" x2=\"179.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"302.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">12:00</text><line x1=\"302.0\" y1=\"44\" x2=\"302.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"425.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">18:00</text><line x1=\"425.0\" y1=\"44\" x2=\"425.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"548.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">24:00</text><line x1=\"548.0\" y1=\"44\" x2=\"548.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"48\" y=\"30\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Light</text><rect x=\"56\" y=\"20\" width=\"492.0\" height=\"12\" fill=\"#FFFFFF\" stroke=\"#1E293B\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><text x=\"48\" y=\"59\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 1</text><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"158.5\" y=\"50\" width=\"46.1\" height=\"10\" fill=\"#1E293B\"/><rect x=\"399.4\" y=\"50\" width=\"50.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"78\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 2</text><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"163.6\" y=\"69\" width=\"30.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"406.6\" y=\"69\" width=\"48.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"97\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 3</text><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"153.4\" y=\"88\" width=\"48.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"402.4\" y=\"88\" width=\"42.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"116\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 4</text><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"160.6\" y=\"107\" width=\"36.9\" height=\"10\" fill=\"#1E293B\"/><rect x=\"408.6\" y=\"107\" width=\"43.1\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"135\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 5</text><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"156.4\" y=\"126\" width=\"47.1\" height=\"10\" fill=\"#1E293B\"/><rect x=\"401.4\" y=\"126\" width=\"46.1\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"154\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 6</text><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"143\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"143\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"162.6\" y=\"145\" width=\"33.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"405.5\" y=\"145\" width=\"48.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"173\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 7</text><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"162\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"162\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"155.4\" y=\"164\" width=\"45.1\" height=\"10\" fill=\"#1E293B\"/><rect x=\"407.6\" y=\"164\" width=\"39.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"192\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 8</text><rect x=\"56\" y=\"181\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"181\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"181\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"159.5\" y=\"183\" width=\"43.1\" height=\"10\" fill=\"#1E293B\"/><rect x=\"400.4\" y=\"183\" width=\"50.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56\" y=\"211\" width=\"18\" height=\"10\" fill=\"#1E293B\"/><text x=\"80\" y=\"220\" font-size=\"11\" fill=\"#6B4E3D\">Activity</text><rect x=\"146\" y=\"211\" width=\"18\" height=\"10\" fill=\"#E9D3B4\" stroke=\"#F1D9B8\"/><text x=\"170\" y=\"220\" font-size=\"11\" fill=\"#6B4E3D\">Dark</text></svg>", "ld_dd": "<svg viewBox=\"0 0 560 310\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Actogram: light-dark cycle for days 1 to 5, then constant darkness from day 6\" font-family=\"Calibri, Segoe UI, Arial, sans-serif\"><text x=\"56.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">00:00</text><line x1=\"56.0\" y1=\"44\" x2=\"56.0\" y2=\"280\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"179.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">06:00</text><line x1=\"179.0\" y1=\"44\" x2=\"179.0\" y2=\"280\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"302.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">12:00</text><line x1=\"302.0\" y1=\"44\" x2=\"302.0\" y2=\"280\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"425.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">18:00</text><line x1=\"425.0\" y1=\"44\" x2=\"425.0\" y2=\"280\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"548.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">24:00</text><line x1=\"548.0\" y1=\"44\" x2=\"548.0\" y2=\"280\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"48\" y=\"30\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Light</text><rect x=\"56\" y=\"20\" width=\"492.0\" height=\"12\" fill=\"#FFFFFF\" stroke=\"#1E293B\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><text x=\"48\" y=\"59\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 1</text><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"445.5\" y=\"50\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"50\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"78\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 2</text><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"450.6\" y=\"69\" width=\"97.4\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"69\" width=\"107.6\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"97\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 3</text><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"440.4\" y=\"88\" width=\"107.6\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"88\" width=\"97.4\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"116\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 4</text><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"447.6\" y=\"107\" width=\"100.4\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"107\" width=\"104.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"135\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 5</text><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"443.4\" y=\"126\" width=\"104.6\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"126\" width=\"100.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"154\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 6</text><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"455.8\" y=\"145\" width=\"92.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"145\" width=\"112.8\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"173\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 7</text><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"466.0\" y=\"164\" width=\"82.0\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"164\" width=\"123.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"192\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 8</text><rect x=\"56\" y=\"181\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"181\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"476.2\" y=\"183\" width=\"71.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"183\" width=\"133.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"211\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 9</text><rect x=\"56\" y=\"200\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"200\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"486.5\" y=\"202\" width=\"61.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"202\" width=\"143.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"230\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 10</text><rect x=\"56\" y=\"219\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"219\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"496.8\" y=\"221\" width=\"51.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"221\" width=\"153.8\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"249\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 11</text><rect x=\"56\" y=\"238\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"238\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"507.0\" y=\"240\" width=\"41.0\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"240\" width=\"164.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"268\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 12</text><rect x=\"56\" y=\"257\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"257\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"517.2\" y=\"259\" width=\"30.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"259\" width=\"174.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56\" y=\"287\" width=\"18\" height=\"10\" fill=\"#1E293B\"/><text x=\"80\" y=\"296\" font-size=\"11\" fill=\"#6B4E3D\">Activity</text><rect x=\"146\" y=\"287\" width=\"18\" height=\"10\" fill=\"#E9D3B4\" stroke=\"#F1D9B8\"/><text x=\"170\" y=\"296\" font-size=\"11\" fill=\"#6B4E3D\">Dark</text></svg>", "early": "<svg viewBox=\"0 0 560 234\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Actogram: constant darkness, activity onset moves earlier each day\" font-family=\"Calibri, Segoe UI, Arial, sans-serif\"><text x=\"56.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">00:00</text><line x1=\"56.0\" y1=\"44\" x2=\"56.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"179.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">06:00</text><line x1=\"179.0\" y1=\"44\" x2=\"179.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"302.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">12:00</text><line x1=\"302.0\" y1=\"44\" x2=\"302.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"425.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">18:00</text><line x1=\"425.0\" y1=\"44\" x2=\"425.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"548.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">24:00</text><line x1=\"548.0\" y1=\"44\" x2=\"548.0\" y2=\"204\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"48\" y=\"30\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Light</text><rect x=\"56\" y=\"20\" width=\"492.0\" height=\"12\" fill=\"#FFFFFF\" stroke=\"#1E293B\" stroke-width=\"1\"/><text x=\"48\" y=\"59\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 1</text><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"466.0\" y=\"50\" width=\"82.0\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"50\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"78\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 2</text><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"455.8\" y=\"69\" width=\"92.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"69\" width=\"92.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"97\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 3</text><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"445.5\" y=\"88\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"88\" width=\"82.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"116\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 4</text><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"435.2\" y=\"107\" width=\"112.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"107\" width=\"71.8\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"135\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 5</text><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"425.0\" y=\"126\" width=\"123.0\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"126\" width=\"61.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"154\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 6</text><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"414.8\" y=\"145\" width=\"133.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"145\" width=\"51.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"173\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 7</text><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"404.5\" y=\"164\" width=\"143.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"164\" width=\"41.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"192\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 8</text><rect x=\"56\" y=\"181\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"181\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"394.2\" y=\"183\" width=\"153.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"183\" width=\"30.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56\" y=\"211\" width=\"18\" height=\"10\" fill=\"#1E293B\"/><text x=\"80\" y=\"220\" font-size=\"11\" fill=\"#6B4E3D\">Activity</text><rect x=\"146\" y=\"211\" width=\"18\" height=\"10\" fill=\"#E9D3B4\" stroke=\"#F1D9B8\"/><text x=\"170\" y=\"220\" font-size=\"11\" fill=\"#6B4E3D\">Dark</text></svg>", "calc": "<svg viewBox=\"0 0 560 215\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Actogram: constant darkness, activity onset moves from 18:00 on day 1 to 21:00 on day 7\" font-family=\"Calibri, Segoe UI, Arial, sans-serif\"><text x=\"56.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">00:00</text><line x1=\"56.0\" y1=\"44\" x2=\"56.0\" y2=\"185\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"179.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">06:00</text><line x1=\"179.0\" y1=\"44\" x2=\"179.0\" y2=\"185\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"302.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">12:00</text><line x1=\"302.0\" y1=\"44\" x2=\"302.0\" y2=\"185\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"425.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">18:00</text><line x1=\"425.0\" y1=\"44\" x2=\"425.0\" y2=\"185\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"548.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">24:00</text><line x1=\"548.0\" y1=\"44\" x2=\"548.0\" y2=\"185\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"48\" y=\"30\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Light</text><rect x=\"56\" y=\"20\" width=\"492.0\" height=\"12\" fill=\"#FFFFFF\" stroke=\"#1E293B\" stroke-width=\"1\"/><text x=\"48\" y=\"59\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 1</text><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"425.0\" y=\"50\" width=\"123.0\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"50\" width=\"61.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"78\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 2</text><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"435.2\" y=\"69\" width=\"112.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"69\" width=\"71.8\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"97\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 3</text><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"445.5\" y=\"88\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"88\" width=\"82.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"116\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 4</text><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"455.8\" y=\"107\" width=\"92.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"107\" width=\"92.2\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"135\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 5</text><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"466.0\" y=\"126\" width=\"82.0\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"126\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"154\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 6</text><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"476.2\" y=\"145\" width=\"71.8\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"145\" width=\"112.8\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"173\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 7</text><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"486.5\" y=\"164\" width=\"61.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"164\" width=\"123.0\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56\" y=\"192\" width=\"18\" height=\"10\" fill=\"#1E293B\"/><text x=\"80\" y=\"201\" font-size=\"11\" fill=\"#6B4E3D\">Activity</text><rect x=\"146\" y=\"192\" width=\"18\" height=\"10\" fill=\"#E9D3B4\" stroke=\"#F1D9B8\"/><text x=\"170\" y=\"201\" font-size=\"11\" fill=\"#6B4E3D\">Dark</text></svg>", "shift": "<svg viewBox=\"0 0 560 291\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Actogram: from day 6 the dark period starts 6 hours earlier, and activity shifts over several days\" font-family=\"Calibri, Segoe UI, Arial, sans-serif\"><text x=\"56.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">00:00</text><line x1=\"56.0\" y1=\"44\" x2=\"56.0\" y2=\"261\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"179.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">06:00</text><line x1=\"179.0\" y1=\"44\" x2=\"179.0\" y2=\"261\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"302.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">12:00</text><line x1=\"302.0\" y1=\"44\" x2=\"302.0\" y2=\"261\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"425.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">18:00</text><line x1=\"425.0\" y1=\"44\" x2=\"425.0\" y2=\"261\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"548.0\" y=\"12\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"middle\">24:00</text><line x1=\"548.0\" y1=\"44\" x2=\"548.0\" y2=\"261\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><text x=\"48\" y=\"30\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Light</text><rect x=\"56\" y=\"20\" width=\"492.0\" height=\"12\" fill=\"#FFFFFF\" stroke=\"#1E293B\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"20\" width=\"123.0\" height=\"12\" fill=\"#1E293B\"/><text x=\"48\" y=\"59\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 1</text><rect x=\"56\" y=\"48\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"48\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"445.5\" y=\"50\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"50\" width=\"102.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"78\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 2</text><rect x=\"56\" y=\"67\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"67\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"448.1\" y=\"69\" width=\"99.9\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"69\" width=\"105.1\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"97\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 3</text><rect x=\"56\" y=\"86\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"86\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"442.9\" y=\"88\" width=\"105.1\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"88\" width=\"99.9\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"116\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 4</text><rect x=\"56\" y=\"105\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"105\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"446.5\" y=\"107\" width=\"101.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"107\" width=\"103.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"135\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 5</text><rect x=\"56\" y=\"124\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"425.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"56.0\" y=\"124\" width=\"123.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"444.5\" y=\"126\" width=\"103.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"126\" width=\"101.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"154\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 6</text><rect x=\"56\" y=\"143\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"302.0\" y=\"143\" width=\"246.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"416.8\" y=\"145\" width=\"131.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"145\" width=\"73.8\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"173\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 7</text><rect x=\"56\" y=\"162\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"302.0\" y=\"162\" width=\"246.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"382.5\" y=\"164\" width=\"165.5\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"164\" width=\"39.5\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"192\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 8</text><rect x=\"56\" y=\"181\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"302.0\" y=\"181\" width=\"246.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"353.8\" y=\"183\" width=\"194.2\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56.0\" y=\"183\" width=\"10.8\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"211\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 9</text><rect x=\"56\" y=\"200\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"302.0\" y=\"200\" width=\"246.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"324.0\" y=\"202\" width=\"205.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"230\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 10</text><rect x=\"56\" y=\"219\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"302.0\" y=\"219\" width=\"246.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"320.4\" y=\"221\" width=\"205.0\" height=\"10\" fill=\"#1E293B\"/><text x=\"48\" y=\"249\" font-size=\"11\" fill=\"#6B4E3D\" text-anchor=\"end\">Day 11</text><rect x=\"56\" y=\"238\" width=\"492.0\" height=\"14\" fill=\"#FFF8EC\" stroke=\"#F1D9B8\" stroke-width=\"1\"/><rect x=\"302.0\" y=\"238\" width=\"246.0\" height=\"14\" fill=\"#E9D3B4\"/><rect x=\"323.5\" y=\"240\" width=\"205.0\" height=\"10\" fill=\"#1E293B\"/><rect x=\"56\" y=\"268\" width=\"18\" height=\"10\" fill=\"#1E293B\"/><text x=\"80\" y=\"277\" font-size=\"11\" fill=\"#6B4E3D\">Activity</text><rect x=\"146\" y=\"268\" width=\"18\" height=\"10\" fill=\"#E9D3B4\" stroke=\"#F1D9B8\"/><text x=\"170\" y=\"277\" font-size=\"11\" fill=\"#6B4E3D\">Dark</text></svg>"};
+
+const QUESTIONS = [
+  {
+    concept: "Reading an actogram",
+    q: "On an actogram, what does each horizontal row represent?",
+    options: [
+      "One hour of recording, with the hours stacked down the page",
+      "One day, with each new day placed below the one before",
+      "One animal, so that several animals can be compared on one graph"
+    ],
+    answer: 1,
+    why: [
+      "Time of day runs along each row, from left to right. The rows themselves are whole days, not hours.",
+      "Each row shows one 24-hour day, with the time of day along the horizontal axis. Successive days are stacked downwards, so you can see how the timing of activity changes from one day to the next.",
+      "An actogram usually records one animal. Each row is a different day for that same animal."
+    ]
+  },
+  {
+    concept: "Activity patterns",
+    fig: "noct",
+    q: "Use the actogram. This animal is best described as",
+    options: [
+      "diurnal",
+      "crepuscular",
+      "nocturnal"
+    ],
+    answer: 2,
+    why: [
+      "A diurnal animal is active during the light period. Here the activity bars sit within the dark period.",
+      "Crepuscular animals are active mainly around dawn and dusk. This animal starts just after dusk but stays active through most of the night, not only at the transitions.",
+      "The activity bars fall within the dark period on every day, starting soon after lights off and ending before lights on. Activity concentrated in the dark is nocturnal."
+    ]
+  },
+  {
+    concept: "Activity patterns",
+    fig: "diur",
+    q: "Use the actogram. This animal is best described as",
+    options: [
+      "diurnal",
+      "nocturnal",
+      "crepuscular"
+    ],
+    answer: 0,
+    why: [
+      "The activity bars sit within the light period every day, starting after lights on and ending before lights off. Activity during the light period is diurnal.",
+      "A nocturnal animal is active in the dark. Here the dark period shows no activity at all.",
+      "Crepuscular animals are active mainly around dawn and dusk. This animal is active across the whole middle of the light period."
+    ]
+  },
+  {
+    concept: "Activity patterns",
+    fig: "crep",
+    q: "Use the actogram. This animal is best described as",
+    options: [
+      "nocturnal, because some of its activity takes place in the dark period",
+      "crepuscular, because its activity is focused around dawn and dusk",
+      "diurnal, because some of its activity takes place in the light period"
+    ],
+    answer: 1,
+    why: [
+      "Part of its activity does fall in the dark, so this is partly right. However, it is not active through the night. Its activity is concentrated in two bursts at the light-dark transitions.",
+      "The animal has two short bursts of activity each day, one around lights on (dawn) and one around lights off (dusk). Activity concentrated at these transitions is crepuscular.",
+      "Part of its activity does fall in the light, so this is partly right. However, it rests through the middle of the day. The bursts sit at the transitions between light and dark."
+    ]
+  },
+  {
+    concept: "Free-running period",
+    fig: "ld_dd",
+    q: "Use the actogram. From day 6, the animal is kept in constant darkness. Which statement is most correct?",
+    options: [
+      "The rhythm stops in constant darkness, so it must be exogenous",
+      "The rhythm continues and drifts later each day, so its free-running period is longer than 24 hours",
+      "The rhythm continues and drifts later each day, so its free-running period is shorter than 24 hours"
+    ],
+    answer: 1,
+    why: [
+      "The activity bars continue in a regular pattern after day 6, so the rhythm has not stopped. Because it continues without a light cue, it is endogenous.",
+      "Without light to reset the clock, activity starts a little later each day. If each cycle ends later than 24 hours after the last, the free-running period must be longer than 24 hours.",
+      "The drift direction is described correctly, so this is partly right. However, starting later each day means each cycle takes longer than 24 hours. A period shorter than 24 hours would make activity start earlier each day."
+    ]
+  },
+  {
+    concept: "Free-running period",
+    fig: "early",
+    q: "Use the actogram. In constant darkness, activity starts 30 minutes earlier each day. What is the free-running period?",
+    options: [
+      "23.5 hours",
+      "24.5 hours",
+      "24 hours"
+    ],
+    answer: 0,
+    why: [
+      "If activity starts 30 minutes earlier each day, each cycle is 30 minutes shorter than 24 hours. The free-running period is 24 - 0.5 = 23.5 hours.",
+      "24.5 hours would make activity start 30 minutes later each day. Here the bars move to the left, which means earlier.",
+      "With a 24-hour period, activity would start at the same time each day and the bars would line up vertically. Here they drift to the left."
+    ]
+  },
+  {
+    concept: "Free-running period",
+    fig: "calc",
+    q: "Use the actogram. In constant darkness, activity onset moves from 18:00 on day 1 to 21:00 on day 7. What is the free-running period?",
+    options: [
+      "27 hours",
+      "24 hours",
+      "24.5 hours"
+    ],
+    answer: 2,
+    why: [
+      "The 3 hours of drift is spread over 6 days, not added to a single day. Adding all 3 hours to 24 overestimates the period.",
+      "With a 24-hour period, activity would start at the same time every day. Here onset moves 3 hours later over the week.",
+      "From day 1 to day 7 is 6 cycles. The onset moves 3 hours later in total, which is 3 ÷ 6 = 0.5 hours per day. Each cycle is therefore 24 + 0.5 = 24.5 hours."
+    ]
+  },
+  {
+    concept: "Interpreting rhythms",
+    q: "Which feature of an actogram gives the best evidence that a rhythm is endogenous?",
+    options: [
+      "Activity lines up neatly with the light and dark periods every day",
+      "Activity continues in a regular rhythm under constant conditions",
+      "Activity lasts for about the same length of time each day"
+    ],
+    answer: 1,
+    why: [
+      "This shows the rhythm is entrained, so it is partly relevant. However, an exogenous response to light would also line up with the light-dark cycle, so this alone does not prove the rhythm is internal.",
+      "If a regular rhythm continues when there are no environmental cues, it must be generated by an internal clock. This is the key evidence that a rhythm is endogenous.",
+      "Consistent activity length is a feature of many rhythms, but it does not show whether the rhythm is generated internally or driven by the environment."
+    ]
+  },
+  {
+    concept: "Interpreting rhythms",
+    fig: "shift",
+    q: "Use the actogram. On day 6, the light-dark cycle is moved 6 hours earlier. Which statement is most correct?",
+    options: [
+      "The biological clock resets immediately, so activity matches the new cycle on day 6",
+      "Activity shifts earlier over several days until it matches the new cycle, showing re-entrainment",
+      "The animal stops showing a rhythm after the change, because its clock is disrupted"
+    ],
+    answer: 1,
+    why: [
+      "Activity on day 6 still starts much later than the new dark period. The clock does not reset straight away.",
+      "After the shift, activity starts a little earlier each day until, by about day 9, it lines up with the new dark period. The clock is gradually reset by the new light cycle, which is re-entrainment, similar to recovering from jet lag.",
+      "Activity continues as a clear daily pattern every day after the change. The rhythm is adjusting, not disappearing."
+    ]
+  },
+  {
+    concept: "Reading an actogram",
+    q: "Why are actograms often double plotted, showing 48 hours on each row?",
+    options: [
+      "To show two different animals side by side for comparison",
+      "To record the same day twice, which doubles the accuracy of the data",
+      "So activity crossing midnight appears as one block, making drift easier to see"
+    ],
+    answer: 2,
+    why: [
+      "A double-plotted actogram still shows one animal. The second half of each row repeats the next day's data.",
+      "Repeating data does not make it more accurate. Double plotting is about making patterns easier to see, not improving the measurements.",
+      "On a single plot, activity that crosses midnight is split between the right-hand end of one row and the left-hand end of the next. Double plotting places each day next to the following day, so activity appears as continuous blocks and gradual drift forms a clear diagonal line."
+    ]
+  }
+];
+
+const TIPS = {
+  "Reading an actogram": "Remember that rows are days stacked downwards, time runs left to right, and double plotting keeps overnight activity in one block.",
+  "Activity patterns": "Practise placing activity against the light and dark periods: nocturnal, diurnal or crepuscular.",
+  "Free-running period": "Calculate the free-running period by dividing the total drift by the number of days: later onset means longer than 24 hours.",
+  "Interpreting rhythms": "Explain what constant conditions and shifted light cycles reveal about endogenous rhythms and re-entrainment."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+let view = "quiz";
+
+const el = id => document.getElementById(id);
+const allDone = () => QUESTIONS.every((_, i) => results[i]);
+
+function buildNav() {
+  const nav = el("qnav");
+  nav.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const b = document.createElement("button");
+    b.textContent = i + 1;
+    b.setAttribute("aria-label", "Question " + (i + 1));
+    b.addEventListener("click", () => goTo(i));
+    nav.appendChild(b);
+  });
+  const r = document.createElement("button");
+  r.className = "results-btn";
+  r.id = "navResults";
+  r.textContent = "Results";
+  r.addEventListener("click", () => { if (allDone()) showResults(); });
+  nav.appendChild(r);
+}
+
+function updateNav() {
+  const buttons = el("qnav").querySelectorAll("button:not(.results-btn)");
+  buttons.forEach((b, i) => {
+    b.className = "";
+    if (results[i]) b.classList.add(results[i].correct ? "done-ok" : "done-no");
+    if (view === "quiz" && i === current) {
+      b.classList.add("current");
+      b.setAttribute("aria-current", "step");
+    } else {
+      b.removeAttribute("aria-current");
+    }
+  });
+  const r = el("navResults");
+  r.disabled = !allDone();
+  r.classList.toggle("current", view === "results");
+  r.title = allDone() ? "See your results" : "Answer all ten questions to unlock your results";
+}
+
+function goTo(i) {
+  current = i;
+  view = "quiz";
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+}
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("qText").innerHTML = item.q;
+  el("fig").innerHTML = item.fig ? FIGS[item.fig] : "";
+  el("fig").style.display = item.fig ? "block" : "none";
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+
+  if (results[current]) showAnswered(results[current].chosen, false);
+  updateNav();
+}
+
+function choose(i) {
+  if (results[current]) return;
+  results[current] = { chosen: i, correct: i === QUESTIONS[current].answer };
+  showAnswered(i, true);
+  updateNav();
+}
+
+function showAnswered(i, focusNext) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  el("options").querySelectorAll(".option").forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+
+  const next = el("nextBtn");
+  next.textContent = allDone() ? "See my results" : "Next question";
+  next.classList.remove("hidden");
+  if (focusNext) next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (allDone()) { showResults(); return; }
+  for (let step = 1; step <= QUESTIONS.length; step++) {
+    const i = (current + step) % QUESTIONS.length;
+    if (!results[i]) { goTo(i); el("qnav").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  }
+}
+
+function showResults() {
+  view = "results";
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of how to read and interpret actograms. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><p class="review-hint">Click any number above to look back at a question.</p><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  updateNav();
+  el("qnav").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  results = [];
+  goTo(0);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (view !== "quiz" || e.target.closest(".qnav")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  if (n !== -1 && !results[current]) choose(n % 3);
+});
+
+buildNav();
+render();
+</script>
+</body>
+</html>
