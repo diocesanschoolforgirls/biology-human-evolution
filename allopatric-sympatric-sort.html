@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allopatric vs sympatric speciation</title>
+<style>
+  :root {
+    --page: #E2F8F4;
+    --text: #1E293B;
+    --heading: #1E293B;
+    --muted: #4A6461;
+    --accent-text: #115E59;
+    --badge: #0F766E;
+    --pill0: #0F766E;
+    --pill1: #14B8A6;
+    --pill1-text: #FFFFFF;
+    --pill2-text: #115E59;
+    --pill-border: #0F766E;
+    --circle: #115E59;
+    --zone-border: #A7DCD2;
+    --zone-bg: #F1FBF9;
+    --zone-over: #CCF1EA;
+    --good: #15803D;
+    --good-tint: #DCFCE7;
+    --bad: #DC2626;
+    --bad-tint: #FEE2E2;
+    --amber: #B45309;
+    --amber-bar: #F59E0B;
+    --amber-tint: #FFFBEB;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--page);
+    color: var(--text);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  .top { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+  .badge {
+    flex: 0 0 auto; width: 58px; height: 58px; border-radius: 12px;
+    background: var(--badge); color: #FFFFFF;
+    font-family: Cambria, "Times New Roman", serif; font-size: 32px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .label { font-size: 13px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; color: var(--accent-text); }
+  h1 { font-family: Cambria, "Times New Roman", serif; font-size: 32px; margin: 2px 0 0; color: var(--heading); line-height: 1.15; }
+  .instr { margin: 10px 0 18px; color: var(--muted); font-size: 16px; font-style: italic; }
+
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .pill {
+    cursor: pointer;
+    border-radius: 999px; padding: 10px 14px; text-align: center;
+    font-weight: bold; font-size: 19px; border: 2px solid var(--pill-border);
+  }
+  .pill.p0 { background: var(--pill0); color: #FFFFFF; }
+  .pill.p1 { background: var(--pill1); color: var(--pill1-text); }
+  .pill.p2 { background: #FFFFFF; color: var(--pill2-text); }
+  .zone {
+    min-height: 150px; border-radius: 14px; padding: 8px;
+    border: 2px dashed var(--zone-border); background: var(--zone-bg);
+    display: flex; flex-direction: column; gap: 8px;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .zone.over, .zone.target { border-color: var(--pill0); background: var(--zone-over); }
+  .zone:focus-visible { outline: 3px solid var(--pill1); outline-offset: 2px; }
+
+  .pool-wrap { margin: 0 0 16px; }
+  .pool-title { font-weight: bold; color: var(--accent-text); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .zone.pool { min-height: 68px; display: block; max-width: 520px; margin: 0 auto; background: transparent; }
+  .zone.pool .card { font-size: 19px; padding: 12px 14px; box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+  .zone.pool .card:not(:first-child) { display: none; }
+  .zone.pool.done { min-height: 0; border: none; padding: 0; }
+  .pool-title { text-align: center; }
+
+  .card {
+    display: flex; align-items: center; gap: 10px;
+    background: #FFFFFF; border-radius: 12px; padding: 10px 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    border: 2px solid transparent;
+    cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+    font-size: 17px;
+  }
+  .card:focus-visible { outline: 3px solid var(--pill1); outline-offset: 2px; }
+  .card.selected { border-color: var(--pill0); box-shadow: 0 0 0 3px var(--zone-over); }
+  .card.dragging { opacity: .3; }
+  .card .num {
+    flex: 0 0 30px; height: 30px; border-radius: 50%;
+    background: var(--circle); color: #FFFFFF; font-weight: bold; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card .txt { flex: 1; }
+  .card .mark { flex: 0 0 auto; font-weight: bold; font-size: 18px; }
+  .card.right { border-color: var(--good); background: var(--good-tint); }
+  .card.right .mark { color: var(--good); }
+  .card.wrong { border-color: var(--bad); background: var(--bad-tint); }
+  .card.wrong .mark { color: var(--bad); }
+  .ghost {
+    position: fixed; z-index: 1000; pointer-events: none; margin: 0;
+    box-shadow: 0 10px 24px rgba(0,0,0,.2); transform: rotate(-2deg); opacity: .95;
+  }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .btn {
+    border: none; border-radius: 24px; padding: 10px 20px; font: inherit; font-weight: bold; font-size: 16px;
+    background: var(--pill0); color: #FFFFFF; cursor: pointer;
+  }
+  .btn:hover { filter: brightness(.92); }
+  .btn.ghostbtn { background: #FFFFFF; color: var(--accent-text); border: 2px solid var(--pill0); }
+  .btn:focus-visible { outline: 3px solid var(--pill1); outline-offset: 2px; }
+
+  .result { margin-top: 16px; }
+  .score {
+    background: #FFFFFF; border-radius: 14px; padding: 14px 18px; font-size: 17px;
+    border-left: 6px solid var(--pill0);
+  }
+  .score strong { font-family: Cambria, "Times New Roman", serif; font-size: 21px; color: var(--heading); }
+  .explain { margin-top: 12px; background: #FFFFFF; border-radius: 14px; padding: 6px 18px; }
+  .ex-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--zone-border); font-size: 16px; }
+  .ex-item:last-child { border-bottom: none; }
+  .ex-item .num { flex: 0 0 28px; height: 28px; border-radius: 50%; background: var(--circle); color: #FFFFFF; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .ex-item b { color: var(--heading); }
+  .principle {
+    margin-top: 12px; border-radius: 14px; padding: 14px 18px;
+    background: var(--amber-tint); border-left: 6px solid var(--amber-bar);
+  }
+  .principle .head { font-weight: bold; color: var(--amber); margin-bottom: 4px; }
+  .principle p { margin: 0; }
+  .drop-fb {
+    margin-top: 14px; border-radius: 14px; padding: 12px 16px; background: #FFFFFF;
+    border-left: 6px solid var(--pill0); font-size: 16px; animation: rise .25s ease;
+  }
+  .drop-fb.ok { border-left-color: var(--good); background: var(--good-tint); }
+  .drop-fb.no { border-left-color: var(--bad); background: var(--bad-tint); }
+  .drop-fb .fb-head { font-weight: bold; margin-bottom: 2px; }
+  .drop-fb.ok .fb-head { color: var(--good); }
+  .drop-fb.no .fb-head { color: var(--bad); }
+  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .tag { display: inline-block; font-size: 12px; font-weight: bold; color: var(--bad); background: var(--bad-tint); border-radius: 10px; padding: 1px 8px; margin-left: 4px; }
+
+  .readme {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--amber-tint); border: 2px solid var(--amber-bar); border-radius: 14px;
+    padding: 10px 14px; margin: 0 0 16px; font-size: 16px;
+  }
+  .readme .eye {
+    flex: 0 0 30px; height: 30px; border-radius: 50%; background: var(--amber-bar); color: #FFFFFF;
+    font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 17px;
+  }
+  .readme b { color: var(--amber); }
+  .fbp {
+    max-width: 640px; margin: 0 auto; border-radius: 16px; padding: 14px 18px 16px;
+    background: #FFFFFF; border: 3px solid var(--pill0); box-shadow: 0 6px 18px rgba(0,0,0,.12);
+    animation: pop .3s ease; outline: none;
+  }
+  .fbp.ok { border-color: var(--good); }
+  .fbp.no { border-color: var(--bad); }
+  .fbp-head { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 19px; margin-bottom: 8px; }
+  .fbp.ok .fbp-head { color: var(--good); }
+  .fbp.no .fbp-head { color: var(--bad); }
+  .fbp-icon {
+    flex: 0 0 34px; height: 34px; border-radius: 50%; color: #FFFFFF; font-size: 19px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fbp.ok .fbp-icon { background: var(--good); }
+  .fbp.no .fbp-icon { background: var(--bad); }
+  .fbp-stmt { font-size: 16px; color: var(--muted); font-style: italic; margin: 0 0 8px; }
+  .fbp-why { border-radius: 12px; padding: 10px 14px; font-size: 17px; }
+  .fbp.ok .fbp-why { background: var(--good-tint); }
+  .fbp.no .fbp-why { background: var(--bad-tint); }
+  .fbp-label { display: block; font-size: 13px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }
+  .fbp.ok .fbp-label { color: var(--good); }
+  .fbp.no .fbp-label { color: var(--bad); }
+  .fbp-next {
+    position: relative; overflow: hidden; display: block; margin: 12px auto 0; min-width: 260px;
+    font-size: 17px; padding: 11px 24px;
+  }
+  .fbp-next:disabled { cursor: default; background: #CBD5E1; color: #475569; filter: none; }
+  .fbp-next .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(255,255,255,.55); }
+  .fbp-next .lbl { position: relative; }
+  .card.just { animation: flash 1.2s ease 2; }
+  @keyframes pop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+  @keyframes flash { 50% { box-shadow: 0 0 0 5px var(--zone-over); } }
+  .review { margin-top: 12px; }
+  .review summary {
+    cursor: pointer; list-style: none; display: inline-block; border-radius: 24px; padding: 8px 18px;
+    background: #FFFFFF; color: var(--accent-text); border: 2px solid var(--pill0); font-weight: bold; font-size: 15px;
+  }
+  .review summary::-webkit-details-marker { display: none; }
+  .review[open] summary { margin-bottom: 4px; }
+  .hidden { display: none !important; }
+
+  @media (max-width: 760px) {
+    .board { gap: 8px; }
+    .pill { font-size: 15px; padding: 8px 6px; }
+    .card { font-size: 15px; padding: 8px; gap: 6px; }
+    .card .num { flex-basis: 22px; height: 22px; font-size: 12px; }
+    .zone:not(.pool) .card { position: relative; align-items: flex-start; padding: 8px 16px 8px 7px; line-height: 1.3; }
+    .zone:not(.pool) .card .mark { position: absolute; top: 3px; right: 5px; font-size: 14px; }
+    .zone { padding: 6px; min-height: 110px; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 15px; padding: 12px 8px 24px; }
+    .top { gap: 10px; }
+    .badge { width: 38px; height: 38px; font-size: 21px; border-radius: 9px; }
+    .label { font-size: 10px; letter-spacing: 1.5px; }
+    h1 { font-size: 20px; }
+    .instr { font-size: 13px; margin: 6px 0 10px; }
+    .readme { font-size: 13px; padding: 8px 10px; gap: 8px; margin-bottom: 10px; }
+    .readme .eye { flex-basis: 22px; height: 22px; font-size: 13px; }
+    .pool-wrap { margin-bottom: 10px; }
+    .pool-title { font-size: 11px; letter-spacing: 1.5px; }
+    .zone.pool { min-height: 0; padding: 5px; }
+    .zone.pool .card { font-size: 15px; padding: 9px 10px; }
+    .board { gap: 5px; }
+    .col { gap: 5px; }
+    .pill { font-size: 12px; padding: 7px 3px; border-radius: 12px; line-height: 1.2; }
+    .zone { min-height: 52px; padding: 5px; }
+    .zone:not(.pool) { flex-direction: row; flex-wrap: wrap; align-content: flex-start; gap: 5px; }
+    .zone:not(.pool) .card { padding: 0; background: none; border: none; box-shadow: none; gap: 0; }
+    .zone:not(.pool) .card .txt, .zone:not(.pool) .card .mark { display: none; }
+    .zone:not(.pool) .card .num { flex-basis: 28px; width: 28px; height: 28px; font-size: 13px; }
+    .zone:not(.pool) .card.right .num { background: var(--good); }
+    .zone:not(.pool) .card.wrong .num { background: var(--bad); }
+    .fbp { padding: 10px 12px 12px; border-width: 2px; }
+    .fbp-head { font-size: 15px; gap: 8px; margin-bottom: 6px; }
+    .fbp-icon { flex-basis: 26px; height: 26px; font-size: 15px; }
+    .fbp-stmt { font-size: 13px; margin-bottom: 6px; }
+    .fbp-why { font-size: 14px; padding: 8px 10px; }
+    .fbp-label { font-size: 11px; }
+    .fbp-next { min-width: 0; width: 100%; font-size: 14px; padding: 9px 10px; }
+    .actions { margin-top: 10px; gap: 6px; }
+    .btn { font-size: 13px; padding: 7px 12px; }
+    .score { font-size: 14px; padding: 10px 12px; }
+    .score strong { font-size: 16px; }
+    .explain { padding: 2px 10px; }
+    .ex-item { font-size: 13px; gap: 8px; padding: 7px 0; }
+    .ex-item .num { flex-basis: 22px; height: 22px; font-size: 12px; }
+    .principle { font-size: 14px; padding: 10px 12px; }
+    .review summary { font-size: 13px; padding: 6px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="badge" aria-hidden="true">1</div>
+    <div>
+      <div class="label">Challenge · AS91605 Speciation</div>
+      <h1>Allopatric vs sympatric speciation</h1>
+    </div>
+  </div>
+  <p class="instr">Drag the statement into the column where it belongs. On a phone or tablet, tap the statement, then tap a column.</p>
+  <div class="readme"><span class="eye" aria-hidden="true">!</span><div><b>Read the feedback every time, even when you are right.</b> The reason is what earns marks in the exam, so a correct guess without the reason is not enough.</div></div>
+
+  <div class="pool-wrap">
+    <div class="pool-title" id="poolTitle">Next statement</div>
+    <div class="zone pool" id="pool" data-zone="pool" tabindex="0" aria-label="Next statement to sort"></div>
+    <div class="fbp hidden" id="fbp" aria-live="polite" tabindex="-1"></div>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="actions">
+    <button class="btn ghostbtn" id="showBtn">Show answers</button>
+    <button class="btn ghostbtn" id="resetBtn">Start again</button>
+  </div>
+
+  <div class="result" id="result" aria-live="polite"></div>
+</div>
+
+<script>
+const CONFIG = {
+ "columns": [
+  {
+   "id": "allo",
+   "label": "Allopatric only"
+  },
+  {
+   "id": "both",
+   "label": "Both"
+  },
+  {
+   "id": "sym",
+   "label": "Sympatric only"
+  }
+ ],
+ "cards": [
+  {
+   "text": "Populations share the same area",
+   "answer": "sym",
+   "why": "The populations live in the same area, so geography is not what keeps them apart. Something else, such as polyploidy or different breeding times, must stop gene flow.",
+   "hint": "Think about which mode of speciation happens in one place, without the populations being separated."
+  },
+  {
+   "text": "Can happen in one generation by polyploidy",
+   "answer": "sym",
+   "why": "A polyploid is reproductively isolated from its parent population as soon as it forms, while still growing in the same place, so this is sympatric.",
+   "hint": "A polyploid is isolated from its parents straight away. Does it need to move anywhere for that to happen?"
+  },
+  {
+   "text": "A physical barrier separates populations",
+   "answer": "allo",
+   "why": "A geographic barrier such as a mountain range, river or stretch of sea splitting a population is how allopatric speciation begins.",
+   "hint": "Ask whether this describes the populations being geographically separated from each other."
+  },
+  {
+   "text": "e.g. pigeons on islands 800 km out to sea become a different species from mainland pigeons",
+   "answer": "allo",
+   "why": "The island pigeons are separated from the mainland population by 800 km of sea. This geographic barrier stops gene flow, so the two populations diverge independently, which is allopatric speciation. New Zealand's parea, on the Chatham Islands, is a real example.",
+   "hint": "Think about what lies between the island and mainland pigeons, and what that does to gene flow."
+  },
+  {
+   "text": "Results in a new species",
+   "answer": "both",
+   "why": "Every mode of speciation ends the same way, with populations that can no longer interbreed to produce fertile offspring.",
+   "hint": "Ask whether only one mode ends in a new species, or whether this is the outcome of any mode."
+  },
+  {
+   "text": "Gene flow between the groups stops",
+   "answer": "both",
+   "why": "Gene flow must stop for any groups to diverge into separate species. The modes differ in what stops it, not in whether it stops.",
+   "hint": "Gene flow has to stop in any kind of speciation. The modes differ in what stops it."
+  },
+  {
+   "text": "e.g. two cicada groups in one forest breeding in different months",
+   "answer": "sym",
+   "why": "Both groups live in the same forest, so there is no geographic barrier. Breeding in different months blocks gene flow within one area, so this is sympatric.",
+   "hint": "Both groups live in the same forest. Is there any geographic barrier between them?"
+  },
+  {
+   "text": "Often begins when a small group reaches a new island",
+   "answer": "allo",
+   "why": "A small founder group that reaches a new island is cut off from the original population by sea. With no gene flow, it can diverge, so this often starts allopatric speciation.",
+   "hint": "Where does the founder group end up, compared with the original population? What lies between them?"
+  }
+ ],
+ "principle": "Allopatric and sympatric speciation share the same outcome and the same requirement, gene flow stopping. They differ in what stops it: a geographic barrier, or a barrier that works within the same area. Apply this whenever you compare modes of speciation, by asking where the populations live and what stops gene flow between them."
+};
+
+const el = id => document.getElementById(id);
+let selected = null;
+let cards = [];
+let firstTry = [];
+let awaiting = false;   // true while feedback is on screen
+let readTimer = null;
+
+function buildBoard() {
+  const board = el("board");
+  board.innerHTML = "";
+  CONFIG.columns.forEach((c, i) => {
+    const col = document.createElement("div");
+    col.className = "col";
+    col.innerHTML = '<div class="pill p' + i + '">' + c.label + '</div>';
+    const zone = document.createElement("div");
+    zone.className = "zone";
+    zone.dataset.zone = c.id;
+    zone.tabIndex = 0;
+    zone.setAttribute("aria-label", c.label + " column");
+    col.appendChild(zone);
+    col.querySelector(".pill").addEventListener("click", () => { if (selected) placeCard(selected, zone); });
+    board.appendChild(col);
+  });
+  document.querySelectorAll(".zone").forEach(z => {
+    z.addEventListener("click", e => {
+      if (!selected || e.target.closest(".card")) return;
+      placeCard(selected, z);
+    });
+    z.addEventListener("keydown", e => {
+      if ((e.key === "Enter" || e.key === " ") && selected && e.target === z) {
+        e.preventDefault();
+        placeCard(selected, z);
+      }
+    });
+  });
+}
+
+function buildCards() {
+  const pool = el("pool");
+  pool.innerHTML = "";
+  firstTry = CONFIG.cards.map(() => null);
+  cards = CONFIG.cards.map((c, i) => {
+    const d = document.createElement("div");
+    d.className = "card";
+    d.tabIndex = 0;
+    d.dataset.i = i;
+    d.setAttribute("role", "button");
+    d.setAttribute("aria-label", "Statement " + (i + 1) + ": " + c.text);
+    d.innerHTML = '<span class="num">' + (i + 1) + '</span><span class="txt">' + c.text + '</span><span class="mark" aria-hidden="true"></span>';
+    pool.appendChild(d);
+    attachDrag(d);
+    d.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (canMove(d)) toggleSelect(d); }
+    });
+    return d;
+  });
+}
+
+function canMove(card) { return !awaiting && card.parentElement && card.parentElement.dataset.zone === "pool"; }
+
+function updatePool() {
+  const n = el("pool").querySelectorAll(".card").length;
+  el("poolTitle").textContent = n ? "Next statement · " + n + " left to sort" : "All statements placed";
+  el("pool").classList.toggle("done", n === 0);
+}
+
+function toggleSelect(card) {
+  if (selected === card) { card.classList.remove("selected"); selected = null; clearTargets(); return; }
+  if (selected) selected.classList.remove("selected");
+  selected = card;
+  card.classList.add("selected");
+  document.querySelectorAll(".zone").forEach(z => { if (z !== card.parentElement) z.classList.add("target"); });
+}
+
+function clearTargets() { document.querySelectorAll(".zone").forEach(z => z.classList.remove("target", "over")); }
+
+function readDelay(text) {
+  const words = text.split(/\s+/).length;
+  return Math.min(4000, Math.max(2000, words * 70));
+}
+
+function showFeedback(card, zoneId) {
+  const i = +card.dataset.i, c = CONFIG.cards[i], n = i + 1;
+  const ok = zoneId === c.answer;
+  const done = ok && cards.every(k => k.classList.contains("right"));
+  const fbp = el("fbp");
+  awaiting = true;
+  el("pool").classList.add("hidden");
+  el("poolTitle").textContent = "Feedback · Statement " + n;
+  fbp.className = "fbp " + (ok ? "ok" : "no");
+  const head = ok
+    ? '<span class="fbp-icon" aria-hidden="true">✓</span>Correct. It belongs in ' + colLabel(c.answer) + '.'
+    : '<span class="fbp-icon" aria-hidden="true">✗</span>Not quite. It is not ' + colLabel(zoneId) + '.';
+  const label = ok ? "Why it belongs here" : "Hint";
+  const body = ok ? c.why : c.hint;
+  const btnText = ok ? (done ? "I have read this · See my score" : "I have read this · Next statement") : "I have read the hint · Try again";
+  fbp.innerHTML =
+    '<div class="fbp-head">' + head + '</div>' +
+    '<p class="fbp-stmt">' + n + '. ' + c.text + '</p>' +
+    '<div class="fbp-why"><span class="fbp-label">' + label + '</span>' + body + '</div>' +
+    '<button class="btn fbp-next" id="fbNext" disabled><span class="fill"></span><span class="lbl">Read the ' + (ok ? 'reason' : 'hint') + ' first…</span></button>';
+  const btn = el("fbNext");
+  const ms = readDelay(body);
+  const fill = btn.querySelector(".fill");
+  requestAnimationFrame(() => { fill.style.transition = "width " + ms + "ms linear"; fill.style.width = "100%"; });
+  clearTimeout(readTimer);
+  readTimer = setTimeout(() => {
+    btn.disabled = false;
+    fill.remove();
+    btn.querySelector(".lbl").textContent = btnText;
+    btn.focus({ preventScroll: true });
+  }, ms);
+  btn.addEventListener("click", () => ok ? (done ? finish() : nextStatement()) : tryAgain(card));
+  fbp.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+function hideFeedback() {
+  clearTimeout(readTimer);
+  awaiting = false;
+  el("fbp").className = "fbp hidden";
+  el("fbp").innerHTML = "";
+  el("pool").classList.remove("hidden");
+  cards.forEach(k => k.classList.remove("just"));
+}
+
+function nextStatement() {
+  hideFeedback();
+  updatePool();
+}
+
+function tryAgain(card) {
+  hideFeedback();
+  const pool = el("pool");
+  card.classList.remove("wrong");
+  card.querySelector(".mark").textContent = "";
+  pool.insertBefore(card, pool.firstChild);
+  updatePool();
+  card.focus({ preventScroll: true });
+}
+
+function finish() {
+  hideFeedback();
+  updatePool();
+  el("result").innerHTML = finalScore("All " + cards.length + " statements sorted.") + explanations();
+  el("result").scrollIntoView({ block: "start", behavior: "smooth" });
+}
+
+function placeCard(card, zone) {
+  const z = zone.dataset.zone;
+  card.classList.remove("selected");
+  selected = null;
+  clearTargets();
+  if (z === "pool" || awaiting) return;
+  zone.appendChild(card);
+  el("result").innerHTML = "";
+  const c = CONFIG.cards[+card.dataset.i];
+  const mark = card.querySelector(".mark");
+  if (firstTry[+card.dataset.i] === null) firstTry[+card.dataset.i] = (z === c.answer);
+  card.classList.remove("right", "wrong");
+  if (z === c.answer) { card.classList.add("right"); mark.textContent = "✓"; }
+  else { card.classList.add("wrong"); mark.textContent = "✗"; }
+  card.classList.add("just");
+  showFeedback(card, z);
+}
+
+function attachDrag(card) {
+  let start = null, ghost = null, dragging = false, offX = 0, offY = 0;
+
+  card.addEventListener("pointerdown", e => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (!canMove(card)) return;
+    start = { x: e.clientX, y: e.clientY };
+    const r = card.getBoundingClientRect();
+    offX = e.clientX - r.left; offY = e.clientY - r.top;
+    card.setPointerCapture(e.pointerId);
+  });
+
+  card.addEventListener("pointermove", e => {
+    if (!start) return;
+    if (!dragging && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) {
+      dragging = true;
+      const r = card.getBoundingClientRect();
+      ghost = card.cloneNode(true);
+      ghost.classList.add("ghost");
+      ghost.classList.remove("selected");
+      ghost.style.width = r.width + "px";
+      document.body.appendChild(ghost);
+      card.classList.add("dragging");
+      if (selected && selected !== card) selected.classList.remove("selected");
+      selected = null;
+    }
+    if (dragging) {
+      ghost.style.left = (e.clientX - offX) + "px";
+      ghost.style.top = (e.clientY - offY) + "px";
+      clearTargets();
+      const z = zoneAt(e.clientX, e.clientY);
+      if (z) z.classList.add("over");
+      autoScroll(e.clientY);
+    }
+  });
+
+  const end = e => {
+    if (!start) return;
+    if (dragging) {
+      const z = zoneAt(e.clientX, e.clientY);
+      ghost.remove(); ghost = null;
+      card.classList.remove("dragging");
+      if (z) placeCard(card, z); else clearTargets();
+    } else if (e.type === "pointerup") {
+      toggleSelect(card);
+    }
+    start = null; dragging = false;
+  };
+  card.addEventListener("pointerup", end);
+  card.addEventListener("pointercancel", end);
+}
+
+function zoneAt(x, y) {
+  const hit = document.elementFromPoint(x, y);
+  return hit ? hit.closest(".zone") : null;
+}
+
+function autoScroll(y) {
+  const edge = 60;
+  if (y < edge) window.scrollBy(0, -12);
+  else if (y > window.innerHeight - edge) window.scrollBy(0, 12);
+}
+
+function colLabel(id) { const c = CONFIG.columns.find(c => c.id === id); return c ? c.label : ""; }
+
+function finalScore(lead) {
+  const total = cards.length;
+  const ft = firstTry.filter(x => x === true).length;
+  let note;
+  if (ft === total) note = 'Ka pai! Every statement was right first time.';
+  else note = 'Statements placed correctly only after a hint, or not tried, count as incorrect. Press Start again to try for a perfect score.';
+  return '<div class="score"><strong>' + lead + ' Your score: ' + ft + ' / ' + total + ' right first time.</strong><br>' + note + '</div>';
+}
+
+function explanations() {
+  let html = '<div class="principle"><div class="head">The underlying principle</div><p>' + CONFIG.principle + '</p></div>';
+  html += '<details class="review"><summary>Review all ' + CONFIG.cards.length + ' explanations</summary><div class="explain">';
+  CONFIG.cards.forEach((c, i) => {
+    const tag = firstTry[i] === false ? ' <span class="tag">not right first time</span>' : '';
+    html += '<div class="ex-item"><span class="num">' + (i + 1) + '</span><div><i>' + c.text + '</i><br><b>' + colLabel(c.answer) + ':</b>' + tag + ' ' + c.why + '</div></div>';
+  });
+  html += '</div></details>';
+  return html;
+}
+
+function showAnswers() {
+  hideFeedback();
+  const zones = {};
+  document.querySelectorAll(".zone").forEach(z => zones[z.dataset.zone] = z);
+  cards.forEach(card => {
+    const c = CONFIG.cards[+card.dataset.i];
+    zones[c.answer].appendChild(card);
+    card.classList.remove("wrong", "selected", "just");
+    card.classList.add("right");
+    card.querySelector(".mark").textContent = "✓";
+  });
+  selected = null; clearTargets();
+  firstTry = firstTry.map(x => x === null ? false : x);
+  el("result").innerHTML = finalScore("Answers shown.") + explanations();
+  updatePool();
+}
+
+function reset() {
+  hideFeedback();
+  selected = null;
+  buildCards();
+  updatePool();
+  clearTargets();
+  el("result").innerHTML = "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("showBtn").addEventListener("click", showAnswers);
+el("resetBtn").addEventListener("click", reset);
+
+buildBoard();
+buildCards();
+updatePool();
+</script>
+</body>
+</html>
