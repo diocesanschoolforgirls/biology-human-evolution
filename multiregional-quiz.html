@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multiregional Hypothesis Quiz</title>
+<style>
+  :root {
+    /* Human Evolution: bright violet, pink and amber */
+    --page: #F5F3FF;          /* lavender page background */
+    --deep-forest: #FAF8FF;   /* feedback and concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #EDE9FE;     /* letter circles, dividers */
+    --sea-mint: #7C3AED;      /* violet accent */
+    --bright: #EC4899;        /* pink */
+    --rust: #5B21B6;          /* deep violet text accent */
+    --ivory-mint: #1E1B4B;    /* body text */
+    --sage-mist: #5B5675;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on violet fills */
+    --soft-moss: #5B21B6;     /* button hover */
+    --heading: #1E1B4B;       /* headings */
+    --good: #15803D;          /* correct */
+    --good-tint: #DCFCE7;
+    --rose: #DC2626;          /* incorrect */
+    --rose-tint: #FEE2E2;
+    --mint-tint: #DCFCE7;
+    --option-bg: #FAF8FF;
+    --track: #DDD6FE;
+    --amber: #B45309;         /* principle heading */
+    --amber-bar: #F59E0B;
+    --amber-tint: #FFFBEB;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 0; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 10px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+  .label, h3 { color: var(--rust) !important; }
+  .option.correct { border-color: var(--good); background: var(--good-tint); }
+  .option.correct .letter { background: var(--good); color: #FFFFFF; }
+  .fb-box { border-left-color: var(--good); }
+  .fb-box .fb-head { color: var(--good) !important; }
+  .fb-box.wrong .fb-head { color: var(--rose) !important; }
+  .mark.ok { background: var(--good); }
+  .concept-score { color: var(--good); }
+  .letter { color: var(--rust); }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .option.wrong .letter { color: #FFFFFF; }
+
+  /* Question navigation */
+  .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 12px; }
+  .qnav button {
+    width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    border: 2px solid var(--pine-dark); background: var(--pine);
+    color: var(--sage-mist); font: inherit; font-size: 14px; font-weight: bold; line-height: 1;
+    cursor: pointer; transition: transform .15s ease, border-color .15s ease;
+  }
+  .qnav button:hover { border-color: var(--sea-mint); }
+  .qnav button:focus-visible { outline: 3px solid var(--bright); outline-offset: 2px; }
+  .qnav button.done-ok { background: var(--good-tint); border-color: var(--good); color: var(--good); }
+  .qnav button.done-no { background: var(--rose-tint); border-color: var(--rose); color: var(--rose); }
+  .qnav button.current { background: var(--sea-mint); border-color: var(--sea-mint); color: #FFFFFF; }
+  .qnav button.results-btn { width: auto; padding: 0 14px; border-radius: 16px; margin-left: auto; }
+  .qnav button.results-btn:disabled { opacity: .45; cursor: default; }
+  .qnav button.results-btn:disabled:hover { border-color: var(--pine-dark); }
+  @media (max-width: 520px) {
+    .qnav { gap: 5px; }
+    .qnav button { width: 28px; height: 28px; font-size: 13px; }
+    .qnav button.results-btn { margin-left: 0; height: 28px; }
+  }
+  .review-hint { margin: -4px 0 8px; font-size: 15px; color: var(--sage-mist); font-style: italic; }
+  .fb-box.principle { border-left-color: var(--amber-bar); background: var(--amber-tint); }
+  .fb-box.principle .fb-head { color: var(--amber) !important; }
+  .motif span:nth-child(1) { background: var(--amber-bar); opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91606 · Trends in Human Evolution</div>
+    <div class="title-row">
+      <h1>Multiregional Hypothesis</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle"><span id="qCount">Ten</span> questions. Choose the most correct answer.</p>
+    <div class="divider"></div>
+  </header>
+
+  <nav class="qnav" id="qnav" aria-label="Choose a question"></nav>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    "concept": "The hypothesis",
+    "q": "Which statement best describes the Multiregional Hypothesis?",
+    "options": [
+      "Archaic humans in Africa, Europe and Asia each evolved into modern humans, kept as one species by gene flow",
+      "Archaic humans in Africa, Europe and Asia each evolved into modern humans in complete isolation",
+      "Modern humans evolved once in Africa, then spread and largely replaced archaic humans elsewhere"
+    ],
+    "answer": 0,
+    "why": [
+      "The Multiregional Hypothesis proposes that after Homo erectus spread out of Africa, populations in different regions each evolved gradually into modern humans. Gene flow between neighbouring regions kept them connected as a single species.",
+      "Regional evolution is the right idea, so this is partly right. However, complete isolation would have led to separate species. The hypothesis depends on gene flow between regions.",
+      "A single recent origin in Africa followed by replacement is the Out of Africa Hypothesis, the main alternative."
+    ],
+    "principle": "The two main hypotheses of modern human origins differ on whether modern humans arose once in one place or gradually in many places at once. Apply this whenever you classify a statement about human origins, by asking whether it describes one origin or many."
+  },
+  {
+    "concept": "The hypothesis",
+    "q": "Why is gene flow essential to the Multiregional Hypothesis?",
+    "options": [
+      "Gene flow was needed to carry Homo erectus out of Africa in the first place",
+      "Without gene flow, the regional populations would become separate species",
+      "Gene flow made every regional population genetically identical to the others"
+    ],
+    "answer": 1,
+    "why": [
+      "Homo erectus spread out of Africa by migration. Gene flow in the hypothesis refers to ongoing interbreeding between regions afterwards.",
+      "Populations separated for over a million years would build up different mutations and adaptations, and could become separate species. Continued gene flow between neighbouring regions spreads alleles between them, keeping them one species while allowing some regional differences.",
+      "Gene flow keeps populations similar enough to remain one species, but it does not make them identical. Regional differences can still persist."
+    ],
+    "principle": "Gene flow between populations opposes divergence, so separated populations remain one species only if alleles keep moving between them. Apply this whenever you explain how populations stay one species or become two, by asking whether gene flow continues."
+  },
+  {
+    "concept": "Fossil evidence",
+    "q": "What do supporters of the Multiregional Hypothesis mean by regional continuity?",
+    "options": [
+      "Every region of the world has exactly the same mix of human features today",
+      "Distinctive ancient features in a region also appear in its modern people",
+      "All regions were occupied by Homo sapiens continuously for over a million years"
+    ],
+    "answer": 1,
+    "why": [
+      "If every region had the same features, there would be no regional continuity to point to. The idea depends on regions differing from each other.",
+      "Regional continuity is the claim that some distinctive skeletal or dental features found in ancient fossils from a region also appear in the modern people living there. Supporters argue this shows local ancestry.",
+      "Homo sapiens has existed for only about 300 000 years. The hypothesis claims continuity from earlier archaic populations, not a million years of Homo sapiens."
+    ],
+    "principle": "A claim of continuity needs the same distinctive features to persist in the same place through time, so evidence must match both region and feature. Apply this whenever you evaluate a claim of local ancestry, by checking that the feature is distinctive and found in the same region across time."
+  },
+  {
+    "concept": "Fossil evidence",
+    "q": "Shovel-shaped incisors (front teeth curved on the inside) are found in some ancient East Asian fossils and are common in modern East Asian populations. Which conclusion is most correct?",
+    "options": [
+      "This proves that modern East Asians are descended from local Homo erectus",
+      "This shared feature disproves the Multiregional Hypothesis completely",
+      "It fits regional continuity, but the feature could have other explanations"
+    ],
+    "answer": 2,
+    "why": [
+      "A single shared feature cannot prove ancestry. It could have arisen more than once, or entered the population in other ways.",
+      "The feature is consistent with the Multiregional Hypothesis, so it does not disprove it.",
+      "The shared feature fits the idea of regional continuity, so it is used as supporting evidence. However, it could also arise independently, for example through a similar selection pressure, or through limited interbreeding. On its own, it is not conclusive."
+    ],
+    "principle": "A similarity between two populations can have more than one explanation, such as shared ancestry, independent evolution or interbreeding. Apply this whenever a shared feature is used as evidence, by listing the possible explanations before deciding which fits best."
+  },
+  {
+    "concept": "Fossil evidence",
+    "q": "At Zhoukoudian in China, Homo erectus fossils were found in the lower cave layers, and Homo sapiens fossils in the upper layers. What does this show?",
+    "options": [
+      "Homo erectus evolved directly into Homo sapiens at this particular site",
+      "Homo erectus and Homo sapiens lived at this site at exactly the same time",
+      "Both lived there at different times, but layers cannot show ancestry"
+    ],
+    "answer": 2,
+    "why": [
+      "The layers show which came first, but not ancestry. Homo sapiens could have arrived from elsewhere after Homo erectus.",
+      "Lower layers are older than upper layers, so the two species lived there at different times, not together.",
+      "In undisturbed layers, lower is older, so Homo erectus lived at the site before Homo sapiens. However, a later species found above an earlier one does not show it evolved from it. Homo sapiens may have arrived from somewhere else."
+    ],
+    "principle": "A sequence in time does not by itself prove ancestry, because a later species may have arrived from elsewhere rather than evolving locally. Apply this whenever fossils of different species are found in layers at one site, by separating 'came after' from 'evolved from'."
+  },
+  {
+    "concept": "Genetic evidence",
+    "q": "Modern non-Africans carry about 2% Neanderthal DNA. How does this evidence relate to the two hypotheses?",
+    "options": [
+      "It shows Neanderthals evolved into modern Europeans, supporting Multiregional",
+      "Such a small amount shows some mixing, but fits mostly replacement better",
+      "It proves that no interbreeding ever happened, supporting strict Out of Africa"
+    ],
+    "answer": 1,
+    "why": [
+      "If Neanderthals had evolved into modern Europeans, Europeans would carry far more than about 2% Neanderthal DNA.",
+      "The DNA shows some interbreeding did occur, which goes against a strict, no-mixing replacement. However, only about 2% is Neanderthal, so most ancestry comes from the population that left Africa. This fits mostly replacement with limited interbreeding better than full regional continuity.",
+      "The presence of Neanderthal DNA shows interbreeding did happen, so it goes against a strict, no-interbreeding version of Out of Africa."
+    ],
+    "principle": "The amount of a genetic signal matters as well as its presence: a small proportion of DNA from one source shows mixing, but not that it was the main ancestor. Apply this whenever genetic evidence is used to support a hypothesis, by asking whether the quantity, not just the presence, fits."
+  },
+  {
+    "concept": "Genetic evidence",
+    "q": "Human genetic diversity is highest in Africa and decreases with distance from Africa. Why is this a challenge for the Multiregional Hypothesis?",
+    "options": [
+      "Regions evolving in parallel for a million years should each have high diversity",
+      "Genetic diversity cannot be measured accurately in living human populations",
+      "The Multiregional Hypothesis predicts diversity is highest outside of Africa"
+    ],
+    "answer": 0,
+    "why": [
+      "Populations that had evolved locally for over a million years would each have built up their own large store of variation. The pattern of diversity falling steadily away from Africa instead fits a recent spread from Africa, losing diversity at each step.",
+      "Genetic diversity is measured very accurately across many populations, and the pattern is consistent.",
+      "The hypothesis does not predict that diversity is highest outside Africa. The problem is that it predicts high diversity in every region, which is not what is found."
+    ],
+    "principle": "A hypothesis can be tested by working out what it predicts and checking whether the evidence matches. Apply this whenever you evaluate a hypothesis, by stating what pattern it predicts and comparing that prediction with the observed data."
+  },
+  {
+    "concept": "Genetic evidence",
+    "q": "If the Multiregional Hypothesis were correct, what would be expected in the human mtDNA family tree?",
+    "options": [
+      "All of the oldest branches would be found only in African populations",
+      "Every region would have very old branches, over a million years old",
+      "There would be no mutations at all in mtDNA from outside Africa"
+    ],
+    "answer": 1,
+    "why": [
+      "Oldest branches only in Africa is what is actually found, and it fits the Out of Africa Hypothesis.",
+      "If each region's population had evolved locally since Homo erectus spread out of Africa, each would keep its own very old maternal lines. In reality, non-African mtDNA lineages are relatively young and all branch from one African lineage, which challenges the hypothesis.",
+      "Mutations build up in all populations over time. Under any hypothesis, mtDNA outside Africa would carry mutations."
+    ],
+    "principle": "To test a hypothesis, predict the evidence it would produce if it were true, then compare that with what is actually found. Apply this whenever a question asks what we would expect to see, by reasoning forward from the hypothesis to its consequences."
+  },
+  {
+    "concept": "Weighing evidence",
+    "q": "Critics argue that gene flow is a weak point of the Multiregional Hypothesis. Why?",
+    "options": [
+      "Gene flow can only happen between members of two different species",
+      "Gene flow has never been observed in any human population, past or present",
+      "Small, scattered groups would need constant gene flow over huge distances"
+    ],
+    "answer": 2,
+    "why": [
+      "Gene flow happens between populations of the same species, not between different species.",
+      "Gene flow between human populations is well documented, so it clearly can happen. The question is whether it was enough to link the whole Old World for so long.",
+      "To keep populations in Africa, Europe and Asia as one species for over a million years, alleles would have to keep moving across huge distances, between small, scattered groups. Critics argue this is unlikely to have been enough to prevent divergence."
+    ],
+    "principle": "A hypothesis is weakened when it depends on a process that would have to work unusually well, over long periods and great distances. Apply this whenever you evaluate a hypothesis, by identifying the assumptions it needs and judging how realistic they are."
+  },
+  {
+    "concept": "Weighing evidence",
+    "q": "Which statement best evaluates the Multiregional and Out of Africa hypotheses?",
+    "options": [
+      "Multiregional is fully supported, because fossils show continuity in every region",
+      "Neither can be evaluated at all, because the fossil record is incomplete",
+      "Most evidence favours an African origin, with some interbreeding as well"
+    ],
+    "answer": 2,
+    "why": [
+      "Regional continuity is debated, and the genetic evidence challenges the Multiregional Hypothesis, so it is not fully supported.",
+      "The fossil record is incomplete, but genetic evidence from living people adds a great deal. Together they allow a clear evaluation.",
+      "The oldest Homo sapiens fossils, the mtDNA and Y-chromosome trees, and the diversity gradient all point to a recent African origin. Archaic DNA in living people shows there was also some interbreeding. The best fit is mostly replacement from Africa with limited mixing, which borrows a small part of the Multiregional idea."
+    ],
+    "principle": "When evaluating competing hypotheses, weigh all the evidence, and recognise that the best explanation may combine parts of more than one. Apply this whenever you are asked to evaluate hypotheses, by stating which is better supported, why, and what the other one gets right."
+  }
+];
+
+const TIPS = {
+  "The hypothesis": "Describe the Multiregional Hypothesis and explain why gene flow is essential to it.",
+  "Fossil evidence": "Explain regional continuity, and why shared features and fossil layers are not conclusive on their own.",
+  "Genetic evidence": "Explain how archaic DNA, the diversity gradient and the mtDNA tree test the Multiregional Hypothesis.",
+  "Weighing evidence": "Identify the weak points of the hypothesis, and evaluate it against Out of Africa."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+let view = "quiz";
+
+const el = id => document.getElementById(id);
+const allDone = () => QUESTIONS.every((_, i) => results[i]);
+
+function buildNav() {
+  const nav = el("qnav");
+  nav.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const b = document.createElement("button");
+    b.textContent = i + 1;
+    b.setAttribute("aria-label", "Question " + (i + 1));
+    b.addEventListener("click", () => goTo(i));
+    nav.appendChild(b);
+  });
+  const r = document.createElement("button");
+  r.className = "results-btn";
+  r.id = "navResults";
+  r.textContent = "Results";
+  r.addEventListener("click", () => { if (allDone()) showResults(); });
+  nav.appendChild(r);
+}
+
+function updateNav() {
+  const buttons = el("qnav").querySelectorAll("button:not(.results-btn)");
+  buttons.forEach((b, i) => {
+    b.className = "";
+    if (results[i]) b.classList.add(results[i].correct ? "done-ok" : "done-no");
+    if (view === "quiz" && i === current) {
+      b.classList.add("current");
+      b.setAttribute("aria-current", "step");
+    } else {
+      b.removeAttribute("aria-current");
+    }
+  });
+  const r = el("navResults");
+  r.disabled = !allDone();
+  r.classList.toggle("current", view === "results");
+  r.title = allDone() ? "See your results" : "Answer all ten questions to unlock your results";
+}
+
+function goTo(i) {
+  current = i;
+  view = "quiz";
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+}
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("qText").innerHTML = item.q;
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+
+  if (results[current]) showAnswered(results[current].chosen, false);
+  updateNav();
+}
+
+function choose(i) {
+  if (results[current]) return;
+  results[current] = { chosen: i, correct: i === QUESTIONS[current].answer };
+  showAnswered(i, true);
+  updateNav();
+}
+
+function showAnswered(i, focusNext) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  el("options").querySelectorAll(".option").forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  if (item.principle) html += '<div class="fb-box principle"><div class="fb-head">The underlying principle</div><p>' + item.principle + '</p></div>';
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+
+  const next = el("nextBtn");
+  next.textContent = allDone() ? "See my results" : "Next question";
+  next.classList.remove("hidden");
+  if (focusNext) next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (allDone()) { showResults(); return; }
+  for (let step = 1; step <= QUESTIONS.length; step++) {
+    const i = (current + step) % QUESTIONS.length;
+    if (!results[i]) { goTo(i); el("qnav").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  }
+}
+
+function showResults() {
+  view = "results";
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+
+  let heading, msg;
+  const total = QUESTIONS.length;
+  if (score === total) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of the Multiregional Hypothesis. Try explaining each answer aloud without looking."; }
+  else if (score >= Math.ceil(total * 0.8)) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= Math.ceil(total * 0.5)) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">' + total + ' / ' + total + '</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of ' + total + '</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><p class="review-hint">Click any number above to look back at a question.</p><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  updateNav();
+  el("qnav").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  results = [];
+  goTo(0);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (view !== "quiz" || e.target.closest(".qnav")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  if (n !== -1 && !results[current]) choose(n % 3);
+});
+
+const WORDS = ["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve"];
+el("qCount").textContent = WORDS[QUESTIONS.length] || QUESTIONS.length;
+buildNav();
+render();
+</script>
+</body>
+</html>
