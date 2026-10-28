@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skull and Endocranial Features Quiz</title>
+<style>
+  :root {
+    /* Human Evolution: bright violet, pink and amber */
+    --page: #F5F3FF;          /* lavender page background */
+    --deep-forest: #FAF8FF;   /* feedback and concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #EDE9FE;     /* letter circles, dividers */
+    --sea-mint: #7C3AED;      /* violet accent */
+    --bright: #EC4899;        /* pink */
+    --rust: #5B21B6;          /* deep violet text accent */
+    --ivory-mint: #1E1B4B;    /* body text */
+    --sage-mist: #5B5675;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on violet fills */
+    --soft-moss: #5B21B6;     /* button hover */
+    --heading: #1E1B4B;       /* headings */
+    --good: #15803D;          /* correct */
+    --good-tint: #DCFCE7;
+    --rose: #DC2626;          /* incorrect */
+    --rose-tint: #FEE2E2;
+    --mint-tint: #DCFCE7;
+    --option-bg: #FAF8FF;
+    --track: #DDD6FE;
+    --amber: #B45309;         /* principle heading */
+    --amber-bar: #F59E0B;
+    --amber-tint: #FFFBEB;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 0; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 10px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+  .label, h3 { color: var(--rust) !important; }
+  .option.correct { border-color: var(--good); background: var(--good-tint); }
+  .option.correct .letter { background: var(--good); color: #FFFFFF; }
+  .fb-box { border-left-color: var(--good); }
+  .fb-box .fb-head { color: var(--good) !important; }
+  .fb-box.wrong .fb-head { color: var(--rose) !important; }
+  .mark.ok { background: var(--good); }
+  .concept-score { color: var(--good); }
+  .letter { color: var(--rust); }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .option.wrong .letter { color: #FFFFFF; }
+
+  /* Question navigation */
+  .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 12px; }
+  .qnav button {
+    width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    border: 2px solid var(--pine-dark); background: var(--pine);
+    color: var(--sage-mist); font: inherit; font-size: 14px; font-weight: bold; line-height: 1;
+    cursor: pointer; transition: transform .15s ease, border-color .15s ease;
+  }
+  .qnav button:hover { border-color: var(--sea-mint); }
+  .qnav button:focus-visible { outline: 3px solid var(--bright); outline-offset: 2px; }
+  .qnav button.done-ok { background: var(--good-tint); border-color: var(--good); color: var(--good); }
+  .qnav button.done-no { background: var(--rose-tint); border-color: var(--rose); color: var(--rose); }
+  .qnav button.current { background: var(--sea-mint); border-color: var(--sea-mint); color: #FFFFFF; }
+  .qnav button.results-btn { width: auto; padding: 0 14px; border-radius: 16px; margin-left: auto; }
+  .qnav button.results-btn:disabled { opacity: .45; cursor: default; }
+  .qnav button.results-btn:disabled:hover { border-color: var(--pine-dark); }
+  @media (max-width: 520px) {
+    .qnav { gap: 5px; }
+    .qnav button { width: 28px; height: 28px; font-size: 13px; }
+    .qnav button.results-btn { margin-left: 0; height: 28px; }
+  }
+  .review-hint { margin: -4px 0 8px; font-size: 15px; color: var(--sage-mist); font-style: italic; }
+  .fb-box.principle { border-left-color: var(--amber-bar); background: var(--amber-tint); }
+  .fb-box.principle .fb-head { color: var(--amber) !important; }
+  .motif span:nth-child(1) { background: var(--amber-bar); opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91606 · Trends in Human Evolution</div>
+    <div class="title-row">
+      <h1>Skull and Endocranial Features</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. Choose the most correct answer.</p>
+    <div class="divider"></div>
+  </header>
+
+  <nav class="qnav" id="qnav" aria-label="Choose a question"></nav>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    "concept": "Brain size",
+    "q": "Which statement best describes the trend in hominin cranial capacity (brain size)?",
+    "options": [
+      "It increased overall, from about 450 cm³ in australopithecines to about 1350 cm³ in modern humans",
+      "It increased steadily in every hominin species, with no species ever having a smaller brain than its ancestors",
+      "It stayed about the same over time, while body size increased"
+    ],
+    "answer": 0,
+    "why": [
+      "Cranial capacity rose from about 450 cm³ in Australopithecus, to about 600 cm³ in Homo habilis, about 900 cm³ in Homo erectus and about 1350 cm³ in modern humans. The overall trend is a large increase.",
+      "The overall trend is an increase, so this is partly right. However, it was not steady in every species. Homo floresiensis, for example, had a brain of only about 400 cm³.",
+      "Cranial capacity roughly tripled during hominin evolution, far more than the change in body size."
+    ],
+    "principle": "Trends in human evolution are general patterns across many species, not a straight ladder that every species follows. Apply this whenever you describe a trend: give the overall direction with approximate values for several species, and recognise that individual species can break the pattern."
+  },
+  {
+    "concept": "Brain size",
+    "q": "Why do scientists often compare brain size relative to body size, rather than brain size alone?",
+    "options": [
+      "Brain size cannot be measured accurately from the skulls of fossil hominins",
+      "Bigger animals have bigger brains anyway, so a ratio shows brain investment",
+      "Body size has no effect on brain size, so the ratio is only used for convenience"
+    ],
+    "answer": 1,
+    "why": [
+      "Brain size can be estimated quite accurately from fossil skulls, by measuring the volume of the braincase.",
+      "A large animal needs a larger brain simply to control its larger body. Comparing brain size with body size removes this effect, showing whether a species has a bigger brain than expected for its size. Hominins show a large increase in this ratio.",
+      "Body size does strongly affect brain size, which is exactly why the ratio is needed."
+    ],
+    "principle": "When comparing organisms of different sizes, a raw measurement can mislead, so scientists compare values in proportion to body size. Apply this whenever a question compares a feature such as brain size, metabolic rate or surface area across animals of different sizes."
+  },
+  {
+    "concept": "Brain size",
+    "q": "Neanderthals had an average cranial capacity of about 1500 cm³, larger than the modern human average of about 1350 cm³. Which conclusion is most correct?",
+    "options": [
+      "Neanderthals must have been more intelligent than modern humans were",
+      "The measurements must be wrong, because modern humans have the largest brains",
+      "Brain size alone is not intelligence: organisation and body size matter too"
+    ],
+    "answer": 2,
+    "why": [
+      "A larger brain does not automatically mean greater intelligence. Neanderthals also had larger, heavier bodies, which need more brain tissue to control.",
+      "The measurements are reliable. Neanderthal braincases genuinely held larger brains on average.",
+      "Neanderthals had heavy, muscular bodies, and their brains were differently shaped, with a longer, lower skull. How the brain is organised, and its size relative to the body, matter as much as its total volume."
+    ],
+    "principle": "A single measurement rarely tells the whole story: brain size must be interpreted alongside body size and brain organisation. Apply this whenever a question uses one number to rank species, by asking what other factors could explain the difference."
+  },
+  {
+    "concept": "Endocranial evidence",
+    "q": "Which statement best describes an endocast?",
+    "options": [
+      "A fossilised brain that has been preserved inside the skull of the hominin",
+      "A mould of the inside of the braincase, showing brain size and shape",
+      "A cast of the outside of the skull, which shows its overall shape and size"
+    ],
+    "answer": 1,
+    "why": [
+      "Brain tissue decays quickly and is almost never fossilised. An endocast is a mould of the space the brain filled.",
+      "An endocast is made when the inside of the braincase is filled, naturally by sediment or artificially by casting material. It records the size and shape of the brain, and impressions of some surface features, such as the outline of the lobes.",
+      "A cast of the outside of the skull shows the skull's shape, not the brain's. An endocast is made from the inside."
+    ],
+    "principle": "Soft tissues rarely fossilise, so scientists infer them from the hard structures that surrounded them. Apply this whenever a question asks how we know about a brain, muscle or organ in an extinct species: look for impressions or attachment marks left on bone."
+  },
+  {
+    "concept": "Endocranial evidence",
+    "q": "Some early Homo endocasts show an enlarged area in the left frontal lobe, where Broca's area (linked to speech) is found in modern humans. Which conclusion is most correct?",
+    "options": [
+      "It proves early Homo spoke a full language like modern humans",
+      "It suggests a capacity for language, but other evidence is needed to show speech actually occurred",
+      "It shows nothing about language, because endocasts cannot record brain features"
+    ],
+    "answer": 1,
+    "why": [
+      "An enlarged region shows the brain may have had the capacity, but it cannot prove what was actually said, or how complex the language was.",
+      "An enlarged region suggests the brain may have been able to support language. To show speech actually occurred, scientists look for supporting evidence, such as the shape of the hyoid bone in the throat, or cultural evidence such as complex tools and art.",
+      "Endocasts can record impressions of some brain regions, so this is too strong. They have limits, but they do provide evidence."
+    ],
+    "principle": "Anatomical evidence shows a capacity, not a behaviour: a structure that could support an ability does not prove the ability was used. Apply this whenever a fossil feature is linked to a behaviour, by stating what it suggests and what further evidence would confirm it."
+  },
+  {
+    "concept": "Face and jaw",
+    "q": "Over hominin evolution, the face became flatter (less prognathic), and the teeth and jaws became smaller. Which explanation is most likely?",
+    "options": [
+      "A flatter face made room for larger eyes, which improved hominin vision",
+      "Smaller jaws were needed so that the larger brain could fit inside the skull",
+      "Tools and cooking made food softer, so large jaws were no longer favoured"
+    ],
+    "answer": 2,
+    "why": [
+      "Eye size did not increase significantly. The change in the face is linked to chewing, not vision.",
+      "Brain and face changes did happen together, so this is partly right. However, the main driver of smaller jaws and teeth was a change in diet and food preparation.",
+      "Cutting, pounding and cooking food made it softer and easier to chew. Large teeth, jaws and chewing muscles were no longer needed, so smaller ones were not selected against, and the face became flatter."
+    ],
+    "principle": "Changes in the skull often follow changes in diet and behaviour: when chewing demands fall, the jaws, teeth and chewing muscles reduce. Apply this whenever you explain a change in the face or teeth, by linking it to what the species ate and how the food was prepared."
+  },
+  {
+    "concept": "Face and jaw",
+    "q": "A fossil hominin skull has a sagittal crest (a bony ridge along the top of the skull) and wide, flaring cheekbones. Which inference is most reasonable?",
+    "options": [
+      "It must be a male, and this tells us nothing about its diet",
+      "It had a very large brain, because the crest made room for it",
+      "It had very large chewing muscles, suggesting a diet of tough plant food"
+    ],
+    "answer": 2,
+    "why": [
+      "In some species, crests are larger in males, so this is partly right. However, the crest still shows the animal had very large chewing muscles, which tells us about its diet.",
+      "The crest is on the outside of the skull and anchors muscle. It does not increase brain size. Paranthropus had a relatively small brain.",
+      "A sagittal crest anchors very large temporalis (chewing) muscles, and wide cheekbones make space for them. Paranthropus boisei had these features, along with huge molars, suggesting it chewed tough, fibrous plant food."
+    ],
+    "principle": "Bony crests and ridges mark where large muscles attached, and the size of an attachment reflects the size and force of the muscle. Apply this whenever you meet a ridge, crest or roughened area on a fossil bone, by inferring which muscle attached there and what it was used for."
+  },
+  {
+    "concept": "Cranium shape",
+    "q": "Modern humans have a high, vertical forehead and a rounded braincase, while earlier hominins had a low, sloping forehead. What does this change most likely reflect?",
+    "options": [
+      "A smaller face, which left room for a sloping forehead to straighten",
+      "An expansion of the frontal lobes, linked to planning and complex thought",
+      "A need to protect the head from the sun"
+    ],
+    "answer": 1,
+    "why": [
+      "The face did become smaller, so this is partly right. However, the vertical forehead mainly reflects growth of the brain behind it.",
+      "The frontal lobes, behind the forehead, are linked to planning, decision-making and complex thought. Their expansion pushed the forehead upwards, producing a high, vertical forehead and a more rounded braincase.",
+      "Forehead shape is set by the brain inside, not by sun protection."
+    ],
+    "principle": "The shape of the braincase reflects the shape of the brain inside it, so changes in skull outline can show which brain regions expanded. Apply this whenever you interpret the shape of a skull, by linking each region of the cranium to the part of the brain beneath it."
+  },
+  {
+    "concept": "Face and jaw",
+    "q": "A fossil jaw has teeth arranged in a curved, parabolic arch, with small canines and no gap (diastema) between the canines and neighbouring teeth. Which conclusion is most reasonable?",
+    "options": [
+      "It is human-like, because apes have a U-shaped arch with large canines and a gap",
+      "It belongs to an ape, because all primates have this tooth arrangement",
+      "It cannot be interpreted without the rest of the skull"
+    ],
+    "answer": 0,
+    "why": [
+      "A parabolic arch, small canines and no diastema are features of hominins, especially of Homo. These features show the jaw is human-like rather than ape-like.",
+      "Apes have a U-shaped jaw, with parallel rows of teeth, large canines and a gap where the opposite canine fits. This jaw does not match an ape.",
+      "More of the skull would add evidence, so this is partly right. However, the jaw on its own has several clear features that can be compared with apes and humans."
+    ],
+    "principle": "To interpret a fossil feature, compare it with the same feature in modern apes and modern humans: the closer it is to the human form, the more derived it is. Apply this whenever you meet an unfamiliar fossil, using the ape and human versions as reference points."
+  },
+  {
+    "concept": "Identifying hominins",
+    "q": "A fossil skull has a cranial capacity of about 1400 cm³, a rounded braincase, small brow ridges, a flat face and a clear chin. Which species is it most likely to be?",
+    "options": [
+      "Homo erectus",
+      "Homo neanderthalensis, because it has a large brain",
+      "Homo sapiens"
+    ],
+    "answer": 2,
+    "why": [
+      "Homo erectus had a smaller brain, about 900 cm³ on average, a long, low braincase and heavy brow ridges.",
+      "Neanderthals did have large brains, so this is partly right. However, they had a long, low skull, large brow ridges, a projecting mid-face and no true chin.",
+      "A large, rounded braincase, small brow ridges, a flat face and a chin together match Homo sapiens. A true chin is found only in modern humans."
+    ],
+    "principle": "Species are identified by a combination of traits, especially traits found in only one species, such as the chin in Homo sapiens. Apply this whenever you identify a fossil: use several features together, rather than relying on one feature such as brain size."
+  }
+];
+
+const TIPS = {
+  "Brain size": "Describe the trend in cranial capacity with approximate values, and explain why brain size is compared with body size.",
+  "Endocranial evidence": "Explain what an endocast is and what it can and cannot show about the brain, including language.",
+  "Face and jaw": "Link a flatter face, smaller teeth, sagittal crests and the dental arcade to diet and chewing.",
+  "Cranium shape": "Link the vertical forehead and rounded braincase to expansion of the frontal lobes.",
+  "Identifying hominins": "Practise identifying a skull from a combination of features, not a single trait."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+let view = "quiz";
+
+const el = id => document.getElementById(id);
+const allDone = () => QUESTIONS.every((_, i) => results[i]);
+
+function buildNav() {
+  const nav = el("qnav");
+  nav.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const b = document.createElement("button");
+    b.textContent = i + 1;
+    b.setAttribute("aria-label", "Question " + (i + 1));
+    b.addEventListener("click", () => goTo(i));
+    nav.appendChild(b);
+  });
+  const r = document.createElement("button");
+  r.className = "results-btn";
+  r.id = "navResults";
+  r.textContent = "Results";
+  r.addEventListener("click", () => { if (allDone()) showResults(); });
+  nav.appendChild(r);
+}
+
+function updateNav() {
+  const buttons = el("qnav").querySelectorAll("button:not(.results-btn)");
+  buttons.forEach((b, i) => {
+    b.className = "";
+    if (results[i]) b.classList.add(results[i].correct ? "done-ok" : "done-no");
+    if (view === "quiz" && i === current) {
+      b.classList.add("current");
+      b.setAttribute("aria-current", "step");
+    } else {
+      b.removeAttribute("aria-current");
+    }
+  });
+  const r = el("navResults");
+  r.disabled = !allDone();
+  r.classList.toggle("current", view === "results");
+  r.title = allDone() ? "See your results" : "Answer all ten questions to unlock your results";
+}
+
+function goTo(i) {
+  current = i;
+  view = "quiz";
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+}
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("qText").innerHTML = item.q;
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+
+  if (results[current]) showAnswered(results[current].chosen, false);
+  updateNav();
+}
+
+function choose(i) {
+  if (results[current]) return;
+  results[current] = { chosen: i, correct: i === QUESTIONS[current].answer };
+  showAnswered(i, true);
+  updateNav();
+}
+
+function showAnswered(i, focusNext) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  el("options").querySelectorAll(".option").forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  if (item.principle) html += '<div class="fb-box principle"><div class="fb-head">The underlying principle</div><p>' + item.principle + '</p></div>';
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+
+  const next = el("nextBtn");
+  next.textContent = allDone() ? "See my results" : "Next question";
+  next.classList.remove("hidden");
+  if (focusNext) next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (allDone()) { showResults(); return; }
+  for (let step = 1; step <= QUESTIONS.length; step++) {
+    const i = (current + step) % QUESTIONS.length;
+    if (!results[i]) { goTo(i); el("qnav").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  }
+}
+
+function showResults() {
+  view = "results";
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of changes in the skull and endocranial features. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><p class="review-hint">Click any number above to look back at a question.</p><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  updateNav();
+  el("qnav").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  results = [];
+  goTo(0);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (view !== "quiz" || e.target.closest(".qnav")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  if (n !== -1 && !results[current]) choose(n % 3);
+});
+
+buildNav();
+render();
+</script>
+</body>
+</html>
