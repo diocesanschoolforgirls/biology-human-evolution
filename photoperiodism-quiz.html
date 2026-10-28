@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photoperiodism Quiz</title>
+<style>
+  :root {
+    /* Orange palette, matching the AS91603 Plant and Animal Responses slides */
+    --page: #FFF4E0;          /* page background */
+    --deep-forest: #FFF9EF;   /* feedback boxes, concept boxes */
+    --pine: #FFFFFF;          /* main card */
+    --pine-dark: #FDE6C6;     /* letter circles, dividers */
+    --sea-mint: #EA580C;      /* orange accent */
+    --bright: #F59E0B;        /* amber */
+    --rust: #9A3412;          /* rust text accent */
+    --ivory-mint: #1E293B;    /* body text */
+    --sage-mist: #6B4E3D;     /* secondary text */
+    --deep-pine: #FFFFFF;     /* white text on orange fills */
+    --soft-moss: #9A3412;     /* button hover */
+    --heading: #1E293B;       /* headings */
+    --good: #2F7D4F;          /* correct */
+    --good-tint: #E4F3E9;
+    --rose: #B42318;          /* incorrect */
+    --rose-tint: #FDECEA;
+    --mint-tint: #E4F3E9;
+    --option-bg: #FFF8EC;
+    --track: #FCE3BE;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: var(--page);
+    color: var(--ivory-mint);
+    font-family: Calibri, "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 0; }
+  .label {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-mint);
+  }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  h1 {
+    font-family: Cambria, "Times New Roman", serif;
+    font-size: 36px;
+    margin: 4px 0 2px;
+    color: var(--heading);
+  }
+  .motif { display: flex; gap: 5px; align-items: flex-end; }
+  .motif span { display: block; width: 9px; border-radius: 5px; background: var(--sea-mint); }
+  .motif span:nth-child(1) { height: 18px; opacity: .55; }
+  .motif span:nth-child(2) { height: 28px; background: var(--bright); }
+  .motif span:nth-child(3) { height: 38px; }
+  .subtitle { color: var(--sage-mist); font-style: italic; margin: 0; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .divider { height: 3px; width: 90px; border-radius: 3px; background: var(--sea-mint); margin: 10px 0 0; }
+
+  .progress-row { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+  .progress-track { flex: 1; height: 10px; border-radius: 6px; background: var(--track); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--sea-mint); border-radius: 6px; transition: width .35s ease; }
+  .progress-text { font-size: 15px; color: var(--sage-mist); white-space: nowrap; }
+
+  .card {
+    background: var(--pine);
+    border-radius: 16px;
+    padding: 24px 24px 22px;
+    border: 1px solid var(--pine-dark);
+    box-shadow: 0 2px 6px rgba(15,118,110,.08);
+  }
+  .chip {
+    display: inline-block;
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num { font-size: 14px; color: var(--sage-mist); margin-left: 8px; letter-spacing: 1px; text-transform: uppercase; }
+  .q-text { font-family: Cambria, "Times New Roman", serif; font-size: 22px; font-weight: bold; margin: 4px 0 18px; color: var(--heading); }
+  .q-text em { font-weight: bold; }
+  .instruct { font-size: 15px; color: var(--sage-mist); font-style: italic; margin: -8px 0 14px; }
+
+  .option {
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%;
+    text-align: left;
+    background: var(--option-bg);
+    color: var(--ivory-mint);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .option:hover:not(:disabled) { border-color: var(--sea-mint); }
+  .option:focus-visible { outline: 3px solid var(--sage-mist); outline-offset: 2px; }
+  .option:disabled { cursor: default; }
+  .letter {
+    flex: 0 0 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--pine-dark);
+    color: var(--sea-mint);
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .option.correct { border-color: var(--sea-mint); background: var(--mint-tint); }
+  .option.correct .letter { background: var(--sea-mint); color: var(--deep-pine); }
+  .option.wrong { border-color: var(--rose); background: var(--rose-tint); }
+  .option.wrong .letter { background: var(--rose); color: var(--deep-pine); }
+  .option.faded { opacity: .55; }
+
+  .feedback { margin-top: 16px; display: none; }
+  .feedback.show { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .fb-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--deep-forest);
+    border-left: 6px solid var(--sea-mint);
+  }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .fb-head { font-weight: bold; font-size: 17px; margin-bottom: 4px; }
+  .fb-box .fb-head { color: var(--sea-mint); }
+  .fb-box.wrong .fb-head { color: var(--rose); }
+  .fb-box p { margin: 0; }
+
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .btn {
+    background: var(--sea-mint);
+    color: var(--deep-pine);
+    border: none;
+    border-radius: 24px;
+    padding: 11px 26px;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soft-moss); }
+  .btn:focus-visible { outline: 3px solid var(--ivory-mint); outline-offset: 2px; }
+  .btn.ghost { background: transparent; color: var(--sea-mint); border: 2px solid var(--sea-mint); }
+  .btn.ghost:hover { background: var(--pine-dark); }
+  .hidden { display: none !important; }
+
+  /* Results */
+  .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .score-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--deep-forest);
+    border: 6px solid var(--sea-mint);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  .score-big { color: var(--heading); font-family: Cambria, "Times New Roman", serif; font-size: 38px; font-weight: bold; line-height: 1; }
+  .score-small { font-size: 14px; color: var(--sage-mist); }
+  .score-msg { flex: 1; min-width: 220px; }
+  .score-msg h2 { font-family: Cambria, "Times New Roman", serif; margin: 0 0 6px; font-size: 26px; color: var(--heading); }
+  .score-msg p { margin: 0; color: var(--sage-mist); }
+  h3 { font-family: Cambria, "Times New Roman", serif; font-size: 21px; margin: 26px 0 10px; color: var(--sea-mint); }
+  .concept {
+    background: var(--deep-forest);
+    border-radius: 12px;
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .concept-top { display: flex; justify-content: space-between; gap: 10px; font-weight: bold; }
+  .concept-score { color: var(--sea-mint); white-space: nowrap; }
+  .concept-score.low { color: var(--rose); }
+  .concept p { margin: 6px 0 0; color: var(--sage-mist); font-size: 16px; }
+  .review-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--pine-dark);
+    font-size: 16px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .mark {
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 15px; color: var(--deep-pine);
+  }
+  .mark.ok { background: var(--sea-mint); }
+  .mark.no { background: var(--rose); }
+  .review-item span.sub { display: block; color: var(--sage-mist); font-size: 15px; }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; padding: 20px 12px 48px; }
+    h1 { font-size: 30px; }
+    .q-text { font-size: 20px; }
+    .card { padding: 20px 16px; }
+  }
+  .label, h3 { color: var(--rust) !important; }
+  .option.correct { border-color: var(--good); background: var(--good-tint); }
+  .option.correct .letter { background: var(--good); color: #FFFFFF; }
+  .fb-box { border-left-color: var(--good); }
+  .fb-box .fb-head { color: var(--good) !important; }
+  .fb-box.wrong .fb-head { color: var(--rose) !important; }
+  .mark.ok { background: var(--good); }
+  .concept-score { color: var(--good); }
+  .letter { color: var(--rust); }
+  .fb-box.wrong { border-left-color: var(--rose); }
+  .option.wrong .letter { color: #FFFFFF; }
+
+  /* Question navigation */
+  .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 12px; }
+  .qnav button {
+    width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    border: 2px solid var(--pine-dark); background: var(--pine);
+    color: var(--sage-mist); font: inherit; font-size: 14px; font-weight: bold; line-height: 1;
+    cursor: pointer; transition: transform .15s ease, border-color .15s ease;
+  }
+  .qnav button:hover { border-color: var(--sea-mint); }
+  .qnav button:focus-visible { outline: 3px solid var(--bright); outline-offset: 2px; }
+  .qnav button.done-ok { background: var(--good-tint); border-color: var(--good); color: var(--good); }
+  .qnav button.done-no { background: var(--rose-tint); border-color: var(--rose); color: var(--rose); }
+  .qnav button.current { background: var(--sea-mint); border-color: var(--sea-mint); color: #FFFFFF; }
+  .qnav button.results-btn { width: auto; padding: 0 14px; border-radius: 16px; margin-left: auto; }
+  .qnav button.results-btn:disabled { opacity: .45; cursor: default; }
+  .qnav button.results-btn:disabled:hover { border-color: var(--pine-dark); }
+  @media (max-width: 520px) {
+    .qnav { gap: 5px; }
+    .qnav button { width: 28px; height: 28px; font-size: 13px; }
+    .qnav button.results-btn { margin-left: 0; height: 28px; }
+  }
+  .review-hint { margin: -4px 0 8px; font-size: 15px; color: var(--sage-mist); font-style: italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="label">AS91603 · Plant and Animal Responses</div>
+    <div class="title-row">
+      <h1>Photoperiodism</h1>
+      <div class="motif" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <p class="subtitle">Ten questions. Choose the most correct answer.</p>
+    <div class="divider"></div>
+  </header>
+
+  <nav class="qnav" id="qnav" aria-label="Choose a question"></nav>
+
+  <main id="quiz" class="card" aria-live="polite">
+    <div><span class="chip" id="chip"></span><span class="q-num" id="qNum"></span></div>
+    <div class="q-text" id="qText"></div>
+    <div class="instruct">Select the most correct answer.</div>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions"><button class="btn hidden" id="nextBtn">Next question</button></div>
+  </main>
+
+  <section id="results" class="card hidden" aria-live="polite"></section>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    "concept": "Defining photoperiodism",
+    "q": "Which statement best describes photoperiodism?",
+    "options": [
+      "A plant's response to the relative lengths of day and night",
+      "A plant's response to changes in light intensity during the day",
+      "A plant's growth towards or away from the direction of light"
+    ],
+    "answer": 0,
+    "why": [
+      "Photoperiodism is a response to the photoperiod, the relative lengths of light and dark in each 24 hours. Many plants use it to time flowering to a particular season.",
+      "A response to light intensity, such as Oxalis leaflets folding in bright sunlight, is photonasty. Photoperiodism responds to how long the nights and days are, not how bright the light is.",
+      "Growth towards or away from light is phototropism. Photoperiodism is about the timing of responses such as flowering, not the direction of growth."
+    ]
+  },
+  {
+    "concept": "Defining photoperiodism",
+    "q": "Which statement about what plants actually measure in photoperiodism is most correct?",
+    "options": [
+      "Plants measure the length of the day, which is why they are called long-day and short-day plants",
+      "Plants measure the total amount of light energy they receive across the day",
+      "Plants measure the length of the uninterrupted dark period, compared with a critical night length"
+    ],
+    "answer": 2,
+    "why": [
+      "The names long-day and short-day plant do refer to day length, so this is partly right. However, experiments showed it is the length of the night that matters. The names are older than this discovery.",
+      "Total light energy affects photosynthesis, not the timing of flowering. A plant given the same light energy but a different night length responds differently.",
+      "Plants measure the length of the uninterrupted dark period. Each species has a critical night length, and whether the night is longer or shorter than this decides whether the plant flowers. A brief flash of light in the middle of the night can reset the measurement."
+    ]
+  },
+  {
+    "concept": "Phytochrome",
+    "q": "Which statement best describes how phytochrome changes form?",
+    "options": [
+      "Pfr absorbs red light and becomes Pr, while Pr slowly converts back to Pfr in darkness",
+      "Pr absorbs red light to become Pfr, which far-red light or darkness turns back to Pr",
+      "Both forms slowly convert to Pfr in darkness, so Pfr builds up through a long night"
+    ],
+    "answer": 1,
+    "why": [
+      "This is the reverse. Pr is the form that absorbs red light, and Pfr is the form that slowly changes back in the dark.",
+      "Pr absorbs red light, plentiful in daylight, and converts to Pfr. Pfr absorbs far-red light and converts back to Pr, and in the dark Pfr slowly reverts to Pr. So Pfr is high at the end of the day and falls during the night.",
+      "During the night, Pfr slowly reverts to Pr, so Pfr falls rather than builds up. The longer the night, the less Pfr remains by morning."
+    ]
+  },
+  {
+    "concept": "Plant types",
+    "q": "Chrysanthemums flower in autumn, once nights become longer than their critical night length. Chrysanthemums are",
+    "options": [
+      "long-day plants, because autumn nights are long and they respond to this",
+      "day-neutral plants, because they only flower once a year in autumn",
+      "short-day plants, because nights are longer than their critical night length"
+    ],
+    "answer": 2,
+    "why": [
+      "Long nights do matter here, so this is partly right. However, plants that flower when nights are longer than the critical night length are called short-day plants, because the days are short at that time.",
+      "Day-neutral plants flower regardless of night length. Chrysanthemums only flower once nights pass a set length, so they are responding to the photoperiod.",
+      "Short-day plants flower when the night is longer than their critical night length. In autumn the nights lengthen past this point, so chrysanthemums flower then."
+    ]
+  },
+  {
+    "concept": "Plant types",
+    "q": "Kōwhai flower in spring, once nights become shorter than their critical night length. Kōwhai are",
+    "options": [
+      "long-day plants",
+      "short-day plants, because spring nights are still quite long",
+      "day-neutral plants, because they flower before summer"
+    ],
+    "answer": 0,
+    "why": [
+      "Long-day plants flower when the night is shorter than their critical night length. In spring the nights shorten past this point, so kōwhai flower then.",
+      "Spring nights are still fairly long at first, so this is partly right. However, kōwhai flower once the nights have become shorter than their critical night length, which makes them long-day plants.",
+      "Day-neutral plants flower regardless of night length. Kōwhai flower in response to nights shortening in spring, so they are responding to the photoperiod."
+    ]
+  },
+  {
+    "concept": "Phytochrome",
+    "q": "Using the inhibitory model, why does a long night trigger flowering in a short-day plant?",
+    "options": [
+      "During a long night, Pfr builds up until it is high enough to switch on flowering",
+      "During a long night, Pfr reverts to Pr, so Pfr falls low enough to remove its inhibition of flowering",
+      "During a long night, Pr absorbs the darkness and converts into a flowering hormone"
+    ],
+    "answer": 1,
+    "why": [
+      "Pfr falls during the night rather than building up, because it slowly reverts to Pr in the dark.",
+      "In short-day plants, Pfr inhibits flowering. During a long night, Pfr steadily reverts to Pr. Once the night is longer than the critical night length, Pfr has fallen low enough that the brake on flowering is removed, so the plant flowers.",
+      "Darkness is not absorbed. Pr absorbs red light. In the dark, the important change is Pfr reverting to Pr."
+    ]
+  },
+  {
+    "concept": "Night breaks",
+    "q": "A short-day plant is given long nights, but each night is interrupted by a brief flash of red light. It does not flower. Why?",
+    "options": [
+      "The red flash converts Pr to Pfr, so Pfr rises and each long night acts like two short nights",
+      "The red flash is too brief to be detected, so the plant is not affected by it",
+      "The red flash supplies energy for photosynthesis, so the plant grows leaves instead of flowers"
+    ],
+    "answer": 0,
+    "why": [
+      "The flash converts Pr back to Pfr, so Pfr is high again in the middle of the night. Neither half of the night is long enough for Pfr to fall below the level that inhibits flowering, so the plant responds as if the nights were short and does not flower.",
+      "The flash clearly is detected, because it stops the plant flowering. Even a very brief flash of red light is enough to convert Pr to Pfr.",
+      "A brief flash supplies almost no energy for photosynthesis. Its effect comes from changing the form of phytochrome, not from photosynthesis."
+    ]
+  },
+  {
+    "concept": "Night breaks",
+    "q": "A short-day plant's long night is interrupted by a flash of red light, immediately followed by a flash of far-red light. Which outcome is most likely?",
+    "options": [
+      "It does not flower, because the red flash still breaks the long night",
+      "It flowers, because far-red light turns the Pfr back into Pr",
+      "It does not flower, because two flashes double the night-break effect"
+    ],
+    "answer": 1,
+    "why": [
+      "The red flash on its own would break the night, so this is partly right. However, the far-red flash that follows reverses its effect.",
+      "The red flash converts Pr to Pfr, but the far-red flash straight afterwards converts that Pfr back to Pr. The final flash decides the outcome, so Pfr stays low, the night still counts as long, and the short-day plant flowers.",
+      "The two flashes do not add together. Red and far-red light have opposite effects on phytochrome, so the second flash cancels the first."
+    ]
+  },
+  {
+    "concept": "Plant types",
+    "q": "A native plant begins flowering each April, just after the autumn equinox (21 March), when nights are getting longer. It is most likely to be",
+    "options": [
+      "a long-day plant",
+      "a day-neutral plant",
+      "a short-day plant"
+    ],
+    "answer": 2,
+    "why": [
+      "Long-day plants flower when nights are shortening, typically after the spring equinox in September. This plant flowers as nights lengthen.",
+      "A day-neutral plant could flower in April, so this is partly possible. However, flowering at the same point each year, just as nights lengthen, strongly suggests it is responding to night length.",
+      "After the autumn equinox, nights become longer than days and keep lengthening. A plant that starts flowering then is most likely a short-day plant, flowering once nights pass its critical night length."
+    ]
+  },
+  {
+    "concept": "Adaptive value",
+    "q": "Kōwhai flower in spring, while harakeke flower later in early summer, and tūī feed on the nectar of both. Why is using night length to time flowering an advantage?",
+    "options": [
+      "Flowering at random times would mean each plant faces less competition for pollinators",
+      "Night length is reliable each year, so flowering matches pollinators and other plants",
+      "Temperature is a more reliable cue, so night length is only a backup for temperature"
+    ],
+    "answer": 1,
+    "why": [
+      "Separate flowering times do reduce competition for pollinators, so this is partly right. However, random timing would mean plants of the same species flowered at different times and could not cross-pollinate.",
+      "Night length is the same on a given date every year, unlike temperature, which varies with the weather. Plants of one species flower together, allowing cross-pollination, and flowering is matched to when pollinators such as tūī are active. Different timing in kōwhai and harakeke also reduces competition for the same birds.",
+      "Temperature varies from year to year and day to day, so it is a less reliable cue than night length, not a more reliable one."
+    ]
+  }
+];
+
+const TIPS = {
+  "Defining photoperiodism": "Remember that photoperiodism responds to the length of the night, measured against a critical night length.",
+  "Phytochrome": "Review the phytochrome switch: red light makes Pfr, far-red light or darkness makes Pr, and in short-day plants Pfr inhibits flowering.",
+  "Plant types": "Practise classifying plants: long-day plants flower when nights are shorter than the critical night length, and short-day plants when nights are longer.",
+  "Night breaks": "Explain why a red flash breaks a long night, and why a far-red flash straight afterwards cancels it.",
+  "Adaptive value": "Link reliable flowering timing to cross-pollination, pollinator activity and reduced competition."
+};
+
+const LETTERS = ["A", "B", "C"];
+let current = 0;
+let results = [];
+let view = "quiz";
+
+const el = id => document.getElementById(id);
+const allDone = () => QUESTIONS.every((_, i) => results[i]);
+
+function buildNav() {
+  const nav = el("qnav");
+  nav.innerHTML = "";
+  QUESTIONS.forEach((q, i) => {
+    const b = document.createElement("button");
+    b.textContent = i + 1;
+    b.setAttribute("aria-label", "Question " + (i + 1));
+    b.addEventListener("click", () => goTo(i));
+    nav.appendChild(b);
+  });
+  const r = document.createElement("button");
+  r.className = "results-btn";
+  r.id = "navResults";
+  r.textContent = "Results";
+  r.addEventListener("click", () => { if (allDone()) showResults(); });
+  nav.appendChild(r);
+}
+
+function updateNav() {
+  const buttons = el("qnav").querySelectorAll("button:not(.results-btn)");
+  buttons.forEach((b, i) => {
+    b.className = "";
+    if (results[i]) b.classList.add(results[i].correct ? "done-ok" : "done-no");
+    if (view === "quiz" && i === current) {
+      b.classList.add("current");
+      b.setAttribute("aria-current", "step");
+    } else {
+      b.removeAttribute("aria-current");
+    }
+  });
+  const r = el("navResults");
+  r.disabled = !allDone();
+  r.classList.toggle("current", view === "results");
+  r.title = allDone() ? "See your results" : "Answer all ten questions to unlock your results";
+}
+
+function goTo(i) {
+  current = i;
+  view = "quiz";
+  el("results").classList.add("hidden");
+  el("quiz").classList.remove("hidden");
+  render();
+}
+
+function render() {
+  const item = QUESTIONS[current];
+  el("chip").textContent = item.concept;
+  el("qNum").textContent = "Question " + (current + 1) + " of " + QUESTIONS.length;
+  el("qText").innerHTML = item.q;
+
+  const box = el("options");
+  box.innerHTML = "";
+  item.options.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "option";
+    b.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    b.addEventListener("click", () => choose(i));
+    box.appendChild(b);
+  });
+
+  const fb = el("feedback");
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  el("nextBtn").classList.add("hidden");
+
+  if (results[current]) showAnswered(results[current].chosen, false);
+  updateNav();
+}
+
+function choose(i) {
+  if (results[current]) return;
+  results[current] = { chosen: i, correct: i === QUESTIONS[current].answer };
+  showAnswered(i, true);
+  updateNav();
+}
+
+function showAnswered(i, focusNext) {
+  const item = QUESTIONS[current];
+  const correct = i === item.answer;
+  el("options").querySelectorAll(".option").forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === item.answer) b.classList.add("correct");
+    else if (idx === i) b.classList.add("wrong");
+    else b.classList.add("faded");
+  });
+
+  let html = "";
+  if (correct) {
+    html += '<div class="fb-box"><div class="fb-head">Correct. ' + LETTERS[i] + ' is the most correct answer.</div><p>' + item.why[i] + '</p></div>';
+  } else {
+    html += '<div class="fb-box wrong"><div class="fb-head">Not the most correct. Here is why ' + LETTERS[i] + ' falls short.</div><p>' + item.why[i] + '</p></div>';
+    html += '<div class="fb-box"><div class="fb-head">Why ' + LETTERS[item.answer] + ' is the most correct answer</div><p>' + item.why[item.answer] + '</p></div>';
+  }
+  const fb = el("feedback");
+  fb.innerHTML = html;
+  fb.className = "feedback show";
+
+  const next = el("nextBtn");
+  next.textContent = allDone() ? "See my results" : "Next question";
+  next.classList.remove("hidden");
+  if (focusNext) next.focus({ preventScroll: true });
+}
+
+function nextQuestion() {
+  if (allDone()) { showResults(); return; }
+  for (let step = 1; step <= QUESTIONS.length; step++) {
+    const i = (current + step) % QUESTIONS.length;
+    if (!results[i]) { goTo(i); el("qnav").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  }
+}
+
+function showResults() {
+  view = "results";
+  const score = results.filter(r => r && r.correct).length;
+  el("quiz").classList.add("hidden");
+
+  let heading, msg;
+  if (score === 10) { heading = "Ka pai! Full marks."; msg = "You have a secure understanding of photoperiodism. Try explaining each answer aloud without looking."; }
+  else if (score >= 8) { heading = "Strong work."; msg = "You understand most of the key ideas. Check the concept areas below to tidy up the last gaps."; }
+  else if (score >= 5) { heading = "Good progress."; msg = "The foundations are there. Focus on the concept areas marked below, then try the quiz again."; }
+  else { heading = "Keep going."; msg = "Several answers can sound right in this topic. Work through the concept tips below, then have another go."; }
+
+  const concepts = {};
+  QUESTIONS.forEach((q, i) => {
+    if (!concepts[q.concept]) concepts[q.concept] = { total: 0, right: 0 };
+    concepts[q.concept].total++;
+    if (results[i] && results[i].correct) concepts[q.concept].right++;
+  });
+
+  let conceptHtml = "";
+  const weak = Object.keys(concepts).filter(c => concepts[c].right < concepts[c].total);
+  if (weak.length === 0) {
+    conceptHtml = '<div class="concept"><div class="concept-top"><span>Every concept area secure</span><span class="concept-score">10 / 10</span></div><p>No gaps to review. Well done.</p></div>';
+  } else {
+    weak.forEach(c => {
+      conceptHtml += '<div class="concept"><div class="concept-top"><span>' + c + '</span><span class="concept-score low">' + concepts[c].right + ' / ' + concepts[c].total + '</span></div><p>' + TIPS[c] + '</p></div>';
+    });
+  }
+
+  let reviewHtml = "";
+  QUESTIONS.forEach((q, i) => {
+    const r = results[i];
+    const ok = r && r.correct;
+    const plain = q.q.replace(/<[^>]+>/g, "");
+    const detail = ok
+      ? "You chose " + LETTERS[r.chosen] + ", correct."
+      : "You chose " + LETTERS[r.chosen] + ". The answer is " + LETTERS[q.answer] + ": " + q.options[q.answer] + ".";
+    reviewHtml += '<div class="review-item"><span class="mark ' + (ok ? "ok" : "no") + '">' + (ok ? "✓" : "✗") + '</span><div>' + (i + 1) + ". " + plain + '<span class="sub">' + detail + '</span></div></div>';
+  });
+
+  const res = el("results");
+  res.innerHTML =
+    '<div class="score-wrap">' +
+      '<div class="score-circle"><div class="score-big">' + score + '</div><div class="score-small">out of 10</div></div>' +
+      '<div class="score-msg"><h2>' + heading + '</h2><p>' + msg + '</p></div>' +
+    '</div>' +
+    '<h3>' + (weak.length ? "Concepts to review" : "Concept check") + '</h3>' + conceptHtml +
+    '<h3>Your answers</h3><p class="review-hint">Click any number above to look back at a question.</p><div>' + reviewHtml + '</div>' +
+    '<div class="actions"><button class="btn ghost" id="restartBtn">Try again</button></div>';
+  res.classList.remove("hidden");
+  el("restartBtn").addEventListener("click", restart);
+  updateNav();
+  el("qnav").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function restart() {
+  results = [];
+  goTo(0);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+el("nextBtn").addEventListener("click", nextQuestion);
+document.addEventListener("keydown", e => {
+  if (view !== "quiz" || e.target.closest(".qnav")) return;
+  const n = ["1","2","3","a","b","c"].indexOf(e.key.toLowerCase());
+  if (n !== -1 && !results[current]) choose(n % 3);
+});
+
+buildNav();
+render();
+</script>
+</body>
+</html>
